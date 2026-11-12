@@ -301,7 +301,7 @@ function makeBooth(b, parent, x, z, rotY) {
   [-0.44, 0.44].forEach(x => box(0.05, 1.5, 0.05, M(0x3A2A1E), x, 0.72, -0.06, board));
   menuBoards.push({ b, mat: bm });
   parent.add(g);
-  boothIndex[b.id] = { group: g, marker, booth: b, baseY: 6.1 };
+  boothIndex[b.id] = { group: g, marker, sign, booth: b, baseY: 6.1 };
   signRefs.push({ mesh: sign, b });
   return g;
 }
@@ -396,7 +396,12 @@ function photoFacade(g, hall) {
     if (maxX > minX && maxY > minY) {
       const lw = (maxX - minX) / W * PW, lh = (maxY - minY) / H * PH;
       const lx = ((minX + maxX) / 2 / W - 0.5) * PW, ly = PH - (minY + maxY) / 2 / H * PH;
-      const led = new THREE.Mesh(new THREE.PlaneGeometry(lw, lh), new THREE.MeshBasicMaterial({ map: festivalVideoTexture(), toneMapped: false }));
+      const ledMat = new THREE.MeshBasicMaterial({ color: 0x1a1030, toneMapped: false });
+      loadImg("img-hero.jpg", pim => { if (!ledMat.userData.live) { ledMat.map = texOf(pim); ledMat.color.set(0xffffff); ledMat.needsUpdate = true; } });
+      const vt = festivalVideoTexture();
+      const goLive = () => { ledMat.userData.live = true; ledMat.map = vt; ledMat.color.set(0xffffff); ledMat.needsUpdate = true; };
+      if (ledVideo.readyState >= 3 && !ledVideo.paused) goLive(); else ledVideo.addEventListener("playing", goLive, { once: true });
+      const led = new THREE.Mesh(new THREE.PlaneGeometry(lw, lh), ledMat);
       led.position.set(lx, ly, 4.7); fg.add(led);
     }
     hall.visible = false;
@@ -1263,8 +1268,42 @@ function loop() {
 loadingEl.remove();
 loop();
 
+/* category filter: matching booths keep full markers, others fade */
+let filterZone = null;
+function setFilter(z) {
+  filterZone = z || null;
+  Object.values(boothIndex).forEach(o => {
+    const on = !filterZone || o.booth.zone === filterZone;
+    o.marker.material.opacity = on ? 1 : 0.18;
+    o.marker.scale.setScalar(on && filterZone ? 2.1 : (active === o.booth.id ? 2.3 : 1.7)); o.marker.scale.z = 1;
+    if (o.sign && o.sign.material) { o.sign.material.color.setScalar(on ? 1 : 0.35); }
+  });
+  if (filterZone && !walk.on) {
+    const hits = Object.values(boothIndex).filter(o => o.booth.zone === filterZone && (o.booth.id.startsWith("B") ? "B" : "A") === current);
+    if (hits.length) {
+      const c = new THREE.Vector3(); hits.forEach(o => { const w = new THREE.Vector3(); o.group.getWorldPosition(w); c.add(w); }); c.divideScalar(hits.length);
+      const base = venues[current].userData.cam.clone().sub(venues[current].userData.target).multiplyScalar(0.62);
+      camTo(c.clone().add(base), c, false); controls.autoRotate = false;
+      document.getElementById("btn-rotate").setAttribute("aria-pressed", "false");
+    }
+  }
+}
+/* camera presets */
+const VIEWS = {
+  A: { all: null, gate: [[-2, 7, 36], [-2, 2, 8]], stage: [[-4, 8, 4], [14, 3, -2]], booths: [[-6, 9, 8], [-12, 2, -9]], dining: [[6, 14, 20], [-4, 0, -2]] },
+  B: { all: null, gate: [[-2, 8, 40], [-2, 2, 10]], stage: [[4, 9, 6], [21, 3, 2]], booths: [[0, 12, 6], [-14, 2, -14]], dining: [[10, 16, 24], [0, 0, 0]] }
+};
+function view(name) {
+  if (walk.on) return;
+  const v = VIEWS[current][name];
+  if (!v) { camTo(venues[current].userData.cam, venues[current].userData.target, false); return; }
+  camTo(new THREE.Vector3(...v[0]), new THREE.Vector3(...v[1]), false);
+  controls.autoRotate = false;
+  const rb = document.getElementById("btn-rotate"); rb && rb.setAttribute("aria-pressed", "false");
+}
+
 window.Map3D = {
-  setVenue,
+  setVenue, setFilter, view,
   focus,
   reset() { setActive(null); controls.autoRotate = document.getElementById("btn-rotate").getAttribute("aria-pressed") === "true"; camTo(venues[current].userData.cam, venues[current].userData.target, false); },
   setRotate(on) { controls.autoRotate = on && !reduce; },
