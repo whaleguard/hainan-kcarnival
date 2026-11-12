@@ -602,7 +602,7 @@ function buildVenueB() {
   });
   [[-70, -70, 28], [-20, -80, 34], [40, -78, 30], [80, -66, 24]].forEach(([hx, hz, r]) => {
     const hill = new THREE.Mesh(new THREE.SphereGeometry(r, 18, 10, 0, Math.PI * 2, 0, Math.PI / 2), M(0x2C5A44));
-    hill.position.set(hx, -2, hz); hill.scale.y = 0.5; g.add(hill);
+    hill.position.set(hx, -2, hz); hill.scale.y = 0.5; hotels.add(hill);
   });
 
   const Bb = window.BOOTHS.B;
