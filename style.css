@@ -297,3 +297,5 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
 .hdr .wrap{min-width:0}
 
 @media (max-width:760px){.hero::after{background:linear-gradient(180deg,rgba(7,24,32,.55) 0%,rgba(7,24,32,.88) 45%,var(--ink) 100%)}}
+html[lang="zh"] body,html[lang="ja"] body{word-break:normal;line-break:strict}
+.hero .wrap>*{min-width:0;max-width:100%}
