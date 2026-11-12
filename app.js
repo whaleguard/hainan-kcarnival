@@ -37,6 +37,7 @@
     $$("[data-th]").forEach(el => { el.innerHTML = L[el.dataset.th] + alt(A()[el.dataset.th].replace(/<[^>]+>/g, "").replace(/\n/g, " ")); });
     $$(".sec-head h2[data-t]").forEach(el => { el.innerHTML = esc(L[el.dataset.t]) + alt(A()[el.dataset.t]); });
     $$("[data-tf]").forEach(el => { el.textContent = L.f[el.dataset.tf]; });
+    $$("[data-t-alt]").forEach(el => { el.textContent = A()[el.dataset.tAlt] || ""; });
     $$("[data-nav]").forEach(el => { el.textContent = L.nav[+el.dataset.nav]; });
     $$(".langs button").forEach(b => b.setAttribute("aria-pressed", b.dataset.lang === state.lang));
     $("#f-products").placeholder = L.f.products_ph;

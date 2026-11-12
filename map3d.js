@@ -147,7 +147,7 @@ function markerTexture(id, st, active) {
 
 /* ---------- reusable props ---------- */
 function palm(h = 7, lean = 0.25) {
-  const g = new THREE.Group();
+  const g = new THREE.Group(); g.userData.solidR = 0.35;
   const trunkM = M(0x7A5C43), leafM = M(0x2E7D4F, { side: THREE.DoubleSide });
   let px = 0, py = 0;
   for (let i = 0; i < 6; i++) {
@@ -169,7 +169,7 @@ function palm(h = 7, lean = 0.25) {
   return g;
 }
 function roundTree(s = 1) {
-  const g = new THREE.Group();
+  const g = new THREE.Group(); g.userData.solidR = 0.8 * s;
   const t = cyl(0.18 * s, 0.25 * s, 2 * s, M(0x6B4F3A), 7); t.position.y = s; g.add(t);
   const lm = M(0x2F6B45);
   [[0, 2.6, 0, 1.5], [0.8, 2.3, 0.3, 1.1], [-0.7, 2.4, -0.3, 1.15]].forEach(([x, y, z, r]) => {
@@ -179,7 +179,7 @@ function roundTree(s = 1) {
   return g;
 }
 function parasolSet() {
-  const g = new THREE.Group();
+  const g = new THREE.Group(); g.userData.solidR = 0.95;
   const top = cyl(0.55, 0.55, 0.06, M(0xE9E2D3), 16); top.position.y = 0.75; g.add(top);
   const leg = cyl(0.05, 0.05, 0.75, M(0x444A50), 6); leg.position.y = 0.37; g.add(leg);
   const pole = cyl(0.04, 0.04, 2.5, M(0xCFC8BA), 6); pole.position.y = 1.4; g.add(pole);
@@ -269,7 +269,7 @@ function makeBooth(b, parent, x, z, rotY) {
   glow.position.set(0, 1.8, -1.86); g.add(glow);
   // hit volume
   const hit = new THREE.Mesh(new THREE.BoxGeometry(4.6, 5, 4.6), new THREE.MeshBasicMaterial({ visible: false }));
-  hit.position.y = 2.5; hit.userData.boothId = b.id; g.add(hit); boothMeshes.push(hit);
+  hit.position.y = 2.5; hit.userData.boothId = b.id; hit.userData.solid = true; g.add(hit); boothMeshes.push(hit);
   // marker
   const marker = new THREE.Sprite(new THREE.SpriteMaterial({ map: markerTexture(b.id, b.st, false), depthTest: false, transparent: true }));
   marker.scale.set(1.7, 1.7, 1); marker.position.set(0, 6.1, 0); marker.renderOrder = 12; g.add(marker);
@@ -358,7 +358,7 @@ function photoFacade(g, hall) {
     const PW = 46, PH = PW * H / W;
     const mat = new THREE.MeshStandardMaterial({ map: tex, transparent: true, alphaTest: 0.5, roughness: 0.85, emissive: 0xffffff, emissiveMap: tex, emissiveIntensity: 0.35 });
     const face = new THREE.Mesh(new THREE.PlaneGeometry(PW, PH), mat);
-    const fg = new THREE.Group(); fg.position.set(0, 0, -24); g.add(fg);
+    const fg = new THREE.Group(); fg.position.set(0, 0, -24); g.add(fg); fg.userData.solid = true; window.Map3D && window.Map3D._dirty && window.Map3D._dirty();
     face.position.set(0, PH / 2, 4.65); fg.add(face);
     // massing behind the photo so the building has depth from oblique views
     const bodyTop = PH * (1 - (top / H)) * 0.68;
@@ -422,7 +422,7 @@ function scatterPeople(parent, figs, n, area, avoid, seed) {
 function buildXiaNanyang(g) {
   const cream = M(0xE9DFCC), stone = M(0xCFC4B0), dark = M(0x2A2420), roofM = M(0x3B3F44, { roughness: 0.6 }), glassM = M(0x4F7486, { roughness: 0.15, metalness: 0.5 });
   // main hall along the north edge
-  const hall = new THREE.Group(); hall.position.set(0, 0, -24); g.add(hall);
+  const hall = new THREE.Group(); hall.position.set(0, 0, -24); g.add(hall); hall.userData.solid = true;
   photoFacade(g, hall);
   box(46, 12, 9, cream, 0, 6, 0, hall);                         // 3-storey body
   // gable roof
@@ -465,10 +465,10 @@ function buildXiaNanyang(g) {
     m.position.set(x, 8.4, 4.75); hall.add(m);
   });
   // glass block to the west (behind-left in the render)
-  box(14, 18, 12, glassM, -33, 9, -28, g);
+  box(14, 18, 12, glassM, -33, 9, -28, g).userData.solid = true;
   for (let f = 1; f < 6; f++) box(14.1, 0.3, 12.1, M(0xD8DEE2), -33, f * 3.2, -28, g);
   // north-east angled building (plan top-right)
-  const ne = new THREE.Group(); ne.position.set(29, 0, -18); ne.rotation.y = -Math.PI / 4; g.add(ne);
+  const ne = new THREE.Group(); ne.position.set(29, 0, -18); ne.rotation.y = -Math.PI / 4; g.add(ne); ne.userData.solid = true;
   box(12, 9, 6, stone, 0, 4.5, 0, ne);
   for (let i = 0; i < 4; i++) { const w = new THREE.Mesh(new THREE.PlaneGeometry(2, 3), new THREE.MeshBasicMaterial({ color: 0xFFC67A, transparent: true, opacity: 0.5 })); w.position.set(-4.5 + i * 3, 2, 3.02); ne.add(w); }
   // residential towers far in the background (west / north-west) — replaced by the photo skyline once it loads
@@ -508,7 +508,7 @@ function buildVenueA() {
   landmark("parasol", g, -3.7, 4.6, 1);
 
   // culture stage (faces west)
-  const st = new THREE.Group(); st.position.set(14, 0, -2); st.rotation.y = -Math.PI / 2; g.add(st);
+  const st = new THREE.Group(); st.position.set(14, 0, -2); st.rotation.y = -Math.PI / 2; g.add(st); st.userData.solid = true;
   box(8.5, 0.6, 7, M(0x1F2429), 0, 0.3, 0, st);
   box(8.5, 0.04, 7, M(0x3A2A4E, { roughness: 0.4 }), 0, 0.62, 0, st);
   for (let k = 0; k < 3; k++) box(7, 0.2 * (3 - k), 0.3, M(0x2A3036), 0, 0.1 * (3 - k), 3.65 + k * 0.3, st);
@@ -553,7 +553,7 @@ function buildVenueA() {
 function buildGate(parent, x, z, rotY, ko, zh) {
   const gt = new THREE.Group(); gt.position.set(x, 0, z); gt.rotation.y = rotY; parent.add(gt);
   const red = M(0xA82A22), green = M(0x2F6B5A), tile = M(0x24303A, { roughness: 0.55 });
-  [-4.1, -3.3, 3.3, 4.1].forEach(px => { const p = cyl(0.3, 0.3, 5, red, 14); p.position.set(px, 2.5, 0); gt.add(p); const b = cyl(0.42, 0.42, 0.35, M(0x8E8A82), 14); b.position.set(px, 0.17, 0); gt.add(b); });
+  [-4.1, -3.3, 3.3, 4.1].forEach(px => { const p = cyl(0.3, 0.3, 5, red, 14); p.position.set(px, 2.5, 0); gt.add(p); p.userData.solid = true; const b = cyl(0.42, 0.42, 0.35, M(0x8E8A82), 14); b.position.set(px, 0.17, 0); gt.add(b); });
   box(9.4, 0.5, 0.6, red, 0, 4.75, 0, gt);
   box(9.0, 0.55, 1.0, green, 0, 5.25, 0, gt);
   box(9.6, 0.15, 3.4, M(0x1C242C), 0, 5.6, 0, gt);
@@ -612,7 +612,7 @@ function buildVenueB() {
 
   // same principle as the organizer's Haikou plan: one stage on the right, parasol dining in the middle
   // main stage (K-POP dance battle + performances) on the east side, facing west
-  const st = new THREE.Group(); st.position.set(21, 0, 2); st.rotation.y = -Math.PI / 2; g.add(st);
+  const st = new THREE.Group(); st.position.set(21, 0, 2); st.rotation.y = -Math.PI / 2; g.add(st); st.userData.solid = true;
   box(14, 1.1, 8, M(0x1F2429), 0, 0.55, 0, st);
   for (let k = 0; k < 3; k++) box(8, 0.35 * (3 - k), 0.4, M(0x2A3036), 0, 0.17 * (3 - k), 4.2 + k * 0.4, st);
   const truss = M(0xB8BEC4, { metalness: 0.6, roughness: 0.4 });
@@ -676,6 +676,7 @@ function camTo(pos, target, instant) {
 }
 let tween = null;
 function setVenue(v) {
+  if (walk.on) exitWalk();
   current = v;
   venues.A.visible = v === "A"; venues.B.visible = v === "B";
   setActive(null);
@@ -695,6 +696,7 @@ function setActive(id) {
 }
 function focus(id) {
   const o = boothIndex[id]; if (!o) return;
+  if (walk.on && (id.startsWith("B") ? "B" : "A") === current) { walkToBooth(id); return; }
   const v = id.startsWith("B") ? "B" : "A";
   if (v !== current) { current = v; venues.A.visible = v === "A"; venues.B.visible = v === "B"; }
   setActive(id);
@@ -723,6 +725,7 @@ window.addEventListener("pointerup", e => {
   const moved = Math.hypot(e.clientX - downXY[0], e.clientY - downXY[1]);
   downXY = null;
   if (moved > 6 || e.target !== renderer.domElement) return;
+  if (walk.on) { walkTap(e); return; }
   const id = pick(e);
   if (id) { focus(id); window.App.select(id); }
 });
@@ -732,6 +735,279 @@ renderer.domElement.addEventListener("pointermove", e => {
   if (id !== hoverId) { hoverId = id; renderer.domElement.classList.toggle("pointer", !!id); }
 });
 controls.addEventListener("start", () => { tween = null; });
+/* ---------- walk mode: enter the venue as a visitor (like 용마미식거리 3D) ---------- */
+const walk = { on: false, booth: null, keys: {}, joy: null, dest: null, onArrive: null, colliders: [], dirty: true, near: null, phase: 0 };
+const SPAWN = { A: [-2, 21.5], B: [-2, 24.5] };
+const BOUNDS = { A: [-29, 30, -18.5, 23.5], B: [-37, 37, -21, 27] };
+const RADIUS = 0.38, SPEED = 4.2;
+
+function buildVisitor() {
+  const g = new THREE.Group();
+  const skin = M(0xF1C7A5), hair = M(0x1E1A18), top = M(0xD7261E), pants = M(0x22303C), shoe = M(0xF2F2F2);
+  const legGeo = new THREE.CapsuleGeometry(0.085, 0.62, 4, 10);
+  const armGeo = new THREE.CapsuleGeometry(0.065, 0.5, 4, 10);
+  const legL = new THREE.Group(), legR = new THREE.Group(), armL = new THREE.Group(), armR = new THREE.Group();
+  [[legL, -0.11], [legR, 0.11]].forEach(([lg, x]) => { lg.position.set(x, 0.86, 0); const m = new THREE.Mesh(legGeo, pants); m.position.y = -0.4; m.castShadow = true; lg.add(m); const sh = new THREE.Mesh(new THREE.BoxGeometry(0.14, 0.08, 0.26), shoe); sh.position.set(0, -0.82, 0.04); lg.add(sh); g.add(lg); });
+  const body = new THREE.Mesh(new THREE.CapsuleGeometry(0.2, 0.42, 6, 14), top); body.position.y = 1.18; body.scale.z = 0.72; body.castShadow = true; g.add(body);
+  [[armL, -0.27], [armR, 0.27]].forEach(([ag, x]) => { ag.position.set(x, 1.42, 0); const m = new THREE.Mesh(armGeo, top); m.position.y = -0.3; m.castShadow = true; ag.add(m); const hd = new THREE.Mesh(new THREE.SphereGeometry(0.07, 10, 8), skin); hd.position.y = -0.62; ag.add(hd); g.add(ag); });
+  const head = new THREE.Mesh(new THREE.SphereGeometry(0.17, 24, 18), skin); head.position.y = 1.67; head.castShadow = true; g.add(head);
+  const hr = new THREE.Mesh(new THREE.SphereGeometry(0.178, 24, 14, 0, Math.PI * 2, 0, Math.PI * 0.55), hair); hr.position.y = 1.69; hr.rotation.x = -0.25; g.add(hr);
+  [-0.06, 0.06].forEach(x => { const e = new THREE.Mesh(new THREE.SphereGeometry(0.02, 8, 6), M(0x111111)); e.position.set(x, 1.68, 0.155); g.add(e); });
+  // ring under the visitor so they are easy to find in the crowd
+  const ring = new THREE.Mesh(new THREE.RingGeometry(0.42, 0.52, 40), new THREE.MeshBasicMaterial({ color: 0xD7261E, transparent: true, opacity: 0.85, side: THREE.DoubleSide }));
+  ring.rotation.x = -Math.PI / 2; ring.position.y = 0.03; g.add(ring);
+  const tag = labelSprite("나", "我", 0.55, { f1: 34, f2: 28, bg: "rgba(215,38,30,.95)", c2: "#FFFFFF" });
+  tag.position.y = 2.25; g.add(tag);
+  g.userData.limbs = { legL, legR, armL, armR };
+  g.visible = false;
+  scene.add(g);
+  return g;
+}
+const visitor = buildVisitor();
+
+function computeColliders() {
+  const v = venues[current]; v.updateMatrixWorld(true);
+  const list = [], box3 = new THREE.Box3(), wp = new THREE.Vector3();
+  v.traverse(o => {
+    if (o.userData.solid) { box3.setFromObject(o, true); if (isFinite(box3.min.x)) list.push({ t: "b", x0: box3.min.x, x1: box3.max.x, z0: box3.min.z, z1: box3.max.z }); }
+    else if (o.userData.solidR) { o.getWorldPosition(wp); list.push({ t: "c", x: wp.x, z: wp.z, r: o.userData.solidR }); }
+  });
+  walk.colliders = list; walk.dirty = false;
+}
+function blocked(x, z) {
+  const b = BOUNDS[current];
+  if (x < b[0] || x > b[1] || z < b[2] || z > b[3]) return true;
+  for (const c of walk.colliders) {
+    if (c.t === "b") { if (x > c.x0 - RADIUS && x < c.x1 + RADIUS && z > c.z0 - RADIUS && z < c.z1 + RADIUS) return true; }
+    else if ((x - c.x) ** 2 + (z - c.z) ** 2 < (c.r + RADIUS) ** 2) return true;
+  }
+  return false;
+}
+function boothFront(id) {
+  const o = boothIndex[id]; const wp = new THREE.Vector3(); o.group.getWorldPosition(wp);
+  const f = new THREE.Vector3(0, 0, 1).applyAxisAngle(new THREE.Vector3(0, 1, 0), o.group.rotation.y);
+  return { pos: wp, fwd: f, stand: wp.clone().add(f.clone().multiplyScalar(3.4)) };
+}
+
+const hud = {
+  el: document.getElementById("walk-hud"), prompt: document.getElementById("walk-prompt"), joy: document.getElementById("joy"),
+  view: document.getElementById("booth-view"), cta: document.getElementById("walk-cta")
+};
+const LT = () => window.T[window.App.state.lang];
+const ALT = () => window.T[window.App.state.lang === "zh" ? "ko" : "zh"];
+
+function enterWalk() {
+  if (walk.on) return;
+  walk.on = true; walk.booth = null; walk.dest = null;
+  computeColliders(); buildGrid();
+  const s = SPAWN[current];
+  visitor.position.set(s[0], 0, s[1]); visitor.rotation.y = Math.PI; visitor.visible = true;
+  controls.autoRotate = false; document.getElementById("btn-rotate").setAttribute("aria-pressed", "false");
+  Object.assign(controls, { minDistance: 3, maxDistance: 18, maxPolarAngle: 1.45, enablePan: false });
+  for (const id in boothIndex) boothIndex[id].marker.scale.setScalar(1.1);
+  const tgt = new THREE.Vector3(s[0], 1.5, s[1]);
+  camTo(new THREE.Vector3(s[0], 4.2, s[1] + 7.5), tgt, false);
+  setActive(null);
+  hud.el.hidden = false; hud.cta.hidden = true; hud.view.hidden = true;
+  stage.classList.add("walking");
+}
+function exitWalk() {
+  if (!walk.on) return;
+  walk.on = false; walk.booth = null; walk.dest = null;
+  visitor.visible = false;
+  Object.assign(controls, { minDistance: 12, maxDistance: 130, maxPolarAngle: 1.32, enablePan: true });
+  for (const id in boothIndex) boothIndex[id].marker.scale.setScalar(1.7);
+  hud.el.hidden = true; hud.view.hidden = true; hud.cta.hidden = false; hud.prompt.hidden = true;
+  stage.classList.remove("walking");
+  camTo(venues[current].userData.cam, venues[current].userData.target, false);
+}
+/* grid A* so tapping anywhere routes around booths, tables, trees and the stage */
+const CELL = 0.5;
+function buildGrid() {
+  const b = BOUNDS[current], W = Math.ceil((b[1] - b[0]) / CELL), H = Math.ceil((b[3] - b[2]) / CELL);
+  const g = new Uint8Array(W * H);
+  for (let j = 0; j < H; j++) for (let i = 0; i < W; i++) g[j * W + i] = blocked(b[0] + (i + 0.5) * CELL, b[2] + (j + 0.5) * CELL) ? 1 : 0;
+  walk.grid = { g, W, H, x0: b[0], z0: b[2] };
+}
+function clearLine(ax, az, bx, bz) {
+  const d = Math.hypot(bx - ax, bz - az), n = Math.ceil(d / 0.2);
+  for (let k = 1; k <= n; k++) { const t = k / n; if (blocked(ax + (bx - ax) * t, az + (bz - az) * t)) return false; }
+  return true;
+}
+function findPath(sx, sz, tx, tz) {
+  if (clearLine(sx, sz, tx, tz)) return [[tx, tz]];
+  const G = walk.grid; if (!G) return [[tx, tz]];
+  const { g, W, H, x0, z0 } = G;
+  const ci = x => Math.max(0, Math.min(W - 1, Math.floor((x - x0) / CELL))), cj = z => Math.max(0, Math.min(H - 1, Math.floor((z - z0) / CELL)));
+  let s0 = cj(sz) * W + ci(sx), t0 = cj(tz) * W + ci(tx);
+  if (g[t0]) { // nearest free cell to the target
+    let best = -1, bd = 1e9; const ti = t0 % W, tj = (t0 / W) | 0;
+    for (let r = 1; r < 12 && best < 0; r++) for (let dj = -r; dj <= r; dj++) for (let di = -r; di <= r; di++) {
+      const i = ti + di, j = tj + dj; if (i < 0 || j < 0 || i >= W || j >= H || g[j * W + i]) continue;
+      const d = di * di + dj * dj; if (d < bd) { bd = d; best = j * W + i; }
+    }
+    if (best < 0) return []; t0 = best; tx = x0 + (t0 % W + 0.5) * CELL; tz = z0 + (((t0 / W) | 0) + 0.5) * CELL;
+  }
+  const gs = new Float32Array(W * H).fill(Infinity), from = new Int32Array(W * H).fill(-1), closed = new Uint8Array(W * H);
+  const open = [s0]; gs[s0] = 0;
+  const h = c => { const dx = Math.abs(c % W - t0 % W), dz = Math.abs(((c / W) | 0) - ((t0 / W) | 0)); return Math.max(dx, dz) + 0.414 * Math.min(dx, dz); };
+  const fs = new Float32Array(W * H).fill(Infinity); fs[s0] = h(s0);
+  let found = false, guard = 0;
+  while (open.length && guard++ < 40000) {
+    let bi = 0; for (let k = 1; k < open.length; k++) if (fs[open[k]] < fs[open[bi]]) bi = k;
+    const c = open[bi]; open[bi] = open[open.length - 1]; open.pop();
+    if (c === t0) { found = true; break; }
+    closed[c] = 1; const ci0 = c % W, cj0 = (c / W) | 0;
+    for (let dj = -1; dj <= 1; dj++) for (let di = -1; di <= 1; di++) {
+      if (!di && !dj) continue; const i = ci0 + di, j = cj0 + dj; if (i < 0 || j < 0 || i >= W || j >= H) continue;
+      const n = j * W + i; if (g[n] || closed[n]) continue;
+      if (di && dj && (g[cj0 * W + i] || g[j * W + ci0])) continue;
+      const ng = gs[c] + (di && dj ? 1.414 : 1);
+      if (ng < gs[n]) { gs[n] = ng; fs[n] = ng + h(n); from[n] = c; if (!open.includes(n)) open.push(n); }
+    }
+  }
+  if (!found) return [];
+  const cells = []; for (let c = t0; c !== -1 && c !== s0; c = from[c]) cells.push([x0 + (c % W + 0.5) * CELL, z0 + (((c / W) | 0) + 0.5) * CELL]);
+  cells.reverse(); cells[cells.length - 1] = [tx, tz];
+  // string-pull: keep only the turns we actually need
+  const out = []; let ax = sx, az = sz, k = 0;
+  while (k < cells.length) { let far = k; for (let m = cells.length - 1; m > k; m--) if (clearLine(ax, az, cells[m][0], cells[m][1])) { far = m; break; } out.push(cells[far]); ax = cells[far][0]; az = cells[far][1]; k = far + 1; }
+  return out;
+}
+function walkTo(x, z, onArrive) {
+  walk.path = findPath(visitor.position.x, visitor.position.z, x, z);
+  walk.dest = walk.path.length ? new THREE.Vector2(...walk.path.shift()) : null;
+  walk.onArrive = walk.dest ? (onArrive || null) : null;
+}
+function walkToBooth(id) {
+  if (walk.booth) leaveBooth();
+  const bf = boothFront(id);
+  walkTo(bf.stand.x, bf.stand.z, () => enterBooth(id));
+}
+const groundPlane = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0);
+function walkTap(e) {
+  if (walk.booth) return;
+  const id = pick(e);
+  if (id) { walkToBooth(id); window.App.select(id); return; }
+  const hit = new THREE.Vector3();
+  if (ray.ray.intersectPlane(groundPlane, hit)) walkTo(hit.x, hit.z);
+}
+
+function enterBooth(id) {
+  const bf = boothFront(id); walk.booth = id; walk.dest = null;
+  // visitor steps up to the counter, camera takes the customer's eye view
+  const st = bf.pos.clone().add(bf.fwd.clone().multiplyScalar(2.9));
+  visitor.position.set(st.x, 0, st.z); visitor.rotation.y = Math.atan2(-bf.fwd.x, -bf.fwd.z);
+  const eye = bf.pos.clone().add(bf.fwd.clone().multiplyScalar(6.2)).add(new THREE.Vector3(0, 2.3, 0));
+  camTo(eye, bf.pos.clone().add(new THREE.Vector3(0, 1.7, 0)), false);
+  setActive(id); window.App.select(id);
+  renderBoothView(id);
+  hud.view.hidden = false; hud.prompt.hidden = true;
+}
+function leaveBooth() {
+  if (!walk.booth) return;
+  const bf = boothFront(walk.booth);
+  walk.booth = null; hud.view.hidden = true; setActive(null);
+  visitor.position.set(bf.stand.x, 0, bf.stand.z);
+  const back = bf.stand.clone().add(bf.fwd.clone().multiplyScalar(6)).add(new THREE.Vector3(0, 4, 0));
+  camTo(back, bf.stand.clone().add(new THREE.Vector3(0, 1.5, 0)), false);
+}
+function esc(t) { return String(t).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c])); }
+function renderBoothView(id) {
+  const o = boothIndex[id], b = o.booth, L = LT(), A = ALT(), lang = window.App.state.lang, alt = lang === "zh" ? "ko" : "zh";
+  const p = L.pk[b.pkg], price = window.PKG[b.pkg].price.toLocaleString("en-US");
+  hud.view.innerHTML = `
+    <div class="bv-head"><span class="bv-no" style="background:${ST_HEX[b.st]}">${b.id}</span>
+      <div><p class="bv-kicker">${esc(L.walk_inbooth)} · ${esc(A.walk_inbooth)}</p><h3>${esc(b.name[lang])}<span>${esc(b.name[alt])}</span></h3></div></div>
+    <p class="bv-status ${b.st}">${esc(L.st[b.st])}${b.st === "open" ? " — " + esc(L.walk_vacant) : ""}</p>
+    <dl><dt>${esc(L.card.zone)}</dt><dd>${esc(window.ZONES[b.zone][lang])}</dd><dt>${esc(L.card.size)}</dt><dd>${L.size_booth}</dd><dt>${esc(L.card.pkg)}</dt><dd>${esc(p.name)} · ${esc(p.for)}</dd><dt>${esc(L.card.price)}</dt><dd><b>${price}</b> ${esc(p.unit)}</dd></dl>
+    <div class="bv-btns">${b.st !== "conf" ? `<a class="btn btn-light" href="#apply" data-apply-booth="${b.id}">${esc(L.card.apply)}</a>` : ""}<button type="button" class="btn btn-line-light" id="bv-leave">${esc(L.walk_leave)}</button></div>`;
+  document.getElementById("bv-leave").onclick = leaveBooth;
+}
+
+/* input: keyboard, virtual joystick */
+addEventListener("keydown", e => {
+  if (!walk.on || /INPUT|TEXTAREA|SELECT/.test((e.target.tagName || ""))) return;
+  const k = e.key.toLowerCase();
+  if (["w", "a", "s", "d", "arrowup", "arrowdown", "arrowleft", "arrowright"].includes(k)) { walk.keys[k] = true; walk.dest = null; if (walk.booth) leaveBooth(); e.preventDefault(); }
+  if ((k === "e" || k === "enter") && walk.near && !walk.booth) enterBooth(walk.near);
+  if (k === "escape") { walk.booth ? leaveBooth() : exitWalk(); }
+});
+addEventListener("keyup", e => { walk.keys[e.key.toLowerCase()] = false; });
+(function joystick() {
+  const j = hud.joy, knob = j.querySelector("i"); let id = null, c = null;
+  j.addEventListener("pointerdown", e => { id = e.pointerId; j.setPointerCapture(id); const r = j.getBoundingClientRect(); c = [r.left + r.width / 2, r.top + r.height / 2]; move(e); e.stopPropagation(); });
+  j.addEventListener("pointermove", e => { if (e.pointerId === id) move(e); });
+  const end = e => { if (e.pointerId !== id) return; id = null; walk.joy = null; knob.style.transform = ""; };
+  j.addEventListener("pointerup", end); j.addEventListener("pointercancel", end);
+  function move(e) {
+    let dx = e.clientX - c[0], dy = e.clientY - c[1]; const m = Math.hypot(dx, dy), R = 44;
+    if (m > R) { dx *= R / m; dy *= R / m; }
+    knob.style.transform = `translate(${dx}px,${dy}px)`;
+    walk.joy = [dx / R, dy / R]; walk.dest = null; if (walk.booth) leaveBooth();
+  }
+})();
+hud.prompt.addEventListener("click", () => { if (walk.near) enterBooth(walk.near); });
+document.getElementById("walk-exit").addEventListener("click", exitWalk);
+hud.cta.addEventListener("click", enterWalk);
+document.getElementById("btn-walk").addEventListener("click", () => (walk.on ? exitWalk() : enterWalk()));
+
+const _v = new THREE.Vector3(), _f = new THREE.Vector3(), _r = new THREE.Vector3();
+function walkStep(dt) {
+  if (!dt) return;
+  const L = visitor.userData.limbs;
+  let mx = 0, mz = 0;
+  if (!walk.booth) {
+    const k = walk.keys;
+    let ix = (k.d || k.arrowright ? 1 : 0) - (k.a || k.arrowleft ? 1 : 0);
+    let iz = (k.s || k.arrowdown ? 1 : 0) - (k.w || k.arrowup ? 1 : 0);
+    if (walk.joy) { ix = walk.joy[0]; iz = walk.joy[1]; }
+    if (ix || iz) {
+      camera.getWorldDirection(_f); _f.y = 0; _f.normalize(); _r.crossVectors(_f, camera.up).normalize();
+      _v.copy(_r).multiplyScalar(ix).addScaledVector(_f, -iz);
+      if (_v.lengthSq() > 1) _v.normalize();
+      mx = _v.x; mz = _v.z;
+    } else if (walk.dest) {
+      const dx = walk.dest.x - visitor.position.x, dz = walk.dest.y - visitor.position.z, d = Math.hypot(dx, dz);
+      if (d < 0.2) {
+        if (walk.path && walk.path.length) walk.dest = new THREE.Vector2(...walk.path.shift());
+        else { walk.dest = null; const cb = walk.onArrive; walk.onArrive = null; if (cb) cb(); }
+      }
+      else { const k = Math.min(1, d / (SPEED * dt)); mx = dx / d * k; mz = dz / d * k; }
+    }
+  }
+  const moving = Math.hypot(mx, mz) > 0.01;
+  if (moving) {
+    const p = visitor.position, before = p.clone();
+    const steps = Math.max(1, Math.ceil(SPEED * dt / 0.2)), sx = mx * SPEED * dt / steps, sz = mz * SPEED * dt / steps;
+    for (let i = 0; i < steps; i++) { if (!blocked(p.x + sx, p.z)) p.x += sx; if (!blocked(p.x, p.z + sz)) p.z += sz; }
+    const movedD = before.distanceTo(p);
+    if (walk.dest && movedD < SPEED * dt * 0.1 * Math.hypot(mx, mz)) { walk.stuck = (walk.stuck || 0) + dt; if (walk.stuck > 0.6) { walk.dest = null; walk.path = []; walk.onArrive = null; walk.stuck = 0; } } else walk.stuck = 0;
+    const want = Math.atan2(mx, mz); let dr = want - visitor.rotation.y; dr = Math.atan2(Math.sin(dr), Math.cos(dr));
+    visitor.rotation.y += dr * Math.min(1, dt * 12);
+    // camera follows the visitor; the user can still orbit/zoom around them
+    const dlt = p.clone().sub(before); if (!tween) { camera.position.add(dlt); controls.target.add(dlt); }
+    walk.phase += dt * 9;
+  } else walk.phase *= 0.85;
+  const sw = Math.sin(walk.phase) * (moving ? 0.6 : 0);
+  L.legL.rotation.x = sw; L.legR.rotation.x = -sw; L.armL.rotation.x = -sw * 0.8; L.armR.rotation.x = sw * 0.8;
+  // nearest booth front → prompt
+  let best = null, bd = 3.6;
+  if (!walk.booth) for (const id in boothIndex) {
+    if ((id.startsWith("B") ? "B" : "A") !== current) continue;
+    const bf = boothFront(id), d = Math.hypot(bf.stand.x - visitor.position.x, bf.stand.z - visitor.position.z);
+    if (d < bd) { bd = d; best = id; }
+  }
+  if (best !== walk.near) {
+    walk.near = best;
+    if (best) {
+      const b = boothIndex[best].booth, lang = window.App.state.lang, alt = lang === "zh" ? "ko" : "zh";
+      hud.prompt.innerHTML = `<b>${esc(LT().walk_enterbooth.replace("{id}", b.id).replace("{name}", b.name[lang]))}</b><span>${esc(ALT().walk_enterbooth.replace("{id}", b.id).replace("{name}", b.name[alt]))}</span><kbd>E</kbd>`;
+    }
+    hud.prompt.hidden = !best;
+  }
+}
+
 
 /* ---------- resize + loop ---------- */
 const composer = new EffectComposer(renderer);
@@ -759,6 +1035,7 @@ function loop() {
   requestAnimationFrame(loop);
   if (!visible) return;
   const t = clock.getElapsedTime();
+  const dt = Math.min(0.12, t - (loop.lt ?? t)); loop.lt = t;
   if (tween) {
     tween.k = Math.min(1, tween.k + 0.035);
     const e = 1 - Math.pow(1 - tween.k, 3);
@@ -772,6 +1049,7 @@ function loop() {
     if (seaMat) seaMat.emissiveIntensity = 0.35 + Math.sin(t * 0.8) * 0.08;
     lanternMeshes.forEach((l, i) => { l.material.emissiveIntensity = 1 + Math.sin(t * 2 + i) * 0.25; });
   }
+  if (walk.on) walkStep(dt);
   controls.update();
   composer.render();
 }
@@ -783,7 +1061,8 @@ window.Map3D = {
   focus,
   reset() { setActive(null); controls.autoRotate = document.getElementById("btn-rotate").getAttribute("aria-pressed") === "true"; camTo(venues[current].userData.cam, venues[current].userData.target, false); },
   setRotate(on) { controls.autoRotate = on && !reduce; },
-  setLang() { /* signs are always bilingual KO + ZH */ }
+  setLang() { if (walk.booth) renderBoothView(walk.booth); walk.near = null; },
+  enterWalk, exitWalk, _dirty() { walk.dirty = true; }
 };
 // sync with any state chosen before the module loaded
 if (window.App.state.venue !== "A") setVenue(window.App.state.venue);
