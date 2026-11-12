@@ -2,9 +2,15 @@
 (function () {
   "use strict";
   // sheet: [file, cols, rows]
-  const SHEETS = { S1: ["menu-s1.jpg", 3, 3], S2: ["menu-s2.jpg", 3, 3], S3: ["menu-s3.jpg", 3, 3], S4: ["menu-s4.jpg", 4, 3], S5: ["menu-s5.jpg", 4, 3] };
+  const SHEETS = { S1: ["menu-s1.jpg", 3, 3], S2: ["menu-s2.jpg", 3, 3], S3: ["menu-s3.jpg", 3, 3], S4: ["menu-s4.jpg", 4, 3], S5: ["menu-s5.jpg", 4, 3], S6: ["menu-s6.jpg", 3, 2] };
   // key: [sheet, cell, ko, zh, en, ja]
   const I = {
+    saju: ["S6", 0, "AI 사주 운세 출력", "AI四柱运势打印", "AI saju fortune print", "AI四柱推命プリント"],
+    gunghap: ["S6", 1, "궁합 카드", "缘分配对卡", "Compatibility card", "相性カード"],
+    sinnyeon: ["S6", 2, "2027 신년운세 카드", "2027新年运势福卡", "2027 New-year fortune card", "2027新年運勢カード"],
+    yut: ["S6", 3, "윷놀이 한 판", "尤茨游戏一局", "Yut nori (1 round)", "ユンノリ1回"],
+    tuho: ["S6", 4, "투호 던지기 5개", "投壶 5支", "Tuho (5 arrows)", "投壺5本"],
+    jegi: ["S6", 5, "제기차기·딱지치기 도전", "踢毽子·拍纸板挑战", "Jegi & ddakji challenge", "チェギ・メンコ挑戦"],
     fried: ["S1", 0, "후라이드치킨 한 마리", "原味炸鸡 整只", "Fried chicken (whole)", "フライドチキン 1羽"],
     yang: ["S1", 1, "양념치킨 한 마리", "甜辣炸鸡 整只", "Yangnyeom chicken (whole)", "ヤンニョムチキン 1羽"],
     soy: ["S1", 2, "간장마늘치킨 한 마리", "酱油蒜香炸鸡 整只", "Soy garlic chicken (whole)", "醤油ニンニクチキン 1羽"],
@@ -87,8 +93,8 @@
     B17: [["device", 899], ["serum", 168]],
     B18: [["pcard", 39], ["stick", 199], ["keyring", 29]],
     B19: [["pcard", 25]],
-    B20: [["stick", 199], ["keyring", 29], ["pcard", 39]],
-    B21: [["plush", 89], ["keyring", 29]],
+    B20: [["saju", 20], ["gunghap", 30], ["sinnyeon", 15]],
+    B21: [["yut", 10], ["tuho", 10], ["jegi", 10]],
     B22: [["fourcut", 30]],
     B23: [["hanbok", 99]],
     B24: [["color", 168]]

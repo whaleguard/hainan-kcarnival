@@ -180,7 +180,8 @@ html[lang="zh"] .hero h1,html[lang="ja"] .hero h1{font-size:clamp(38px,5.6vw,82p
 .exp-collage .c1{grid-row:1/3}
 .exp-collage img{width:100%;height:100%;object-fit:cover}
 @media (max-width:900px){.exp-grid{grid-template-columns:1fr}.exp-collage{aspect-ratio:4/3}}
-.tiles{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.tiles{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+@media (max-width:1100px){.tiles{grid-template-columns:1fr 1fr}}
 .tile{position:relative;aspect-ratio:4/5;overflow:hidden;color:#fff;text-decoration:none;display:flex;align-items:flex-end;isolation:isolate;background:#111}
 .tile img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:-2;transition:transform 1.4s cubic-bezier(.2,.7,.2,1)}
 .tile::after{content:"";position:absolute;inset:0;z-index:-1;background:rgba(0,0,0,.08);transition:background .3s}
@@ -200,20 +201,20 @@ html[lang="zh"] .hero h1,html[lang="ja"] .hero h1{font-size:clamp(38px,5.6vw,82p
 .pg-0{grid-column:1/8;grid-row:1/3}
 .pg-1{grid-column:8/13}
 .pg-2{grid-column:8/13}
-.pg-3{grid-column:1/13;flex-direction:row;gap:24px;align-items:stretch;border-top:1px solid var(--line-2);padding-top:24px}
+.pg-3,.pg-4{grid-column:span 6;flex-direction:row;gap:20px;align-items:stretch;border-top:1px solid var(--line-2);padding-top:24px}
 .pg .im{position:relative;aspect-ratio:16/10;background:var(--paper);overflow:hidden}
 .pg-0 .im{aspect-ratio:auto;flex:1;min-height:420px;max-height:600px}
-.pg-3 .im{flex:0 0 42%;aspect-ratio:16/9}
+.pg-3 .im,.pg-4 .im{flex:0 0 48%;aspect-ratio:4/3}
 .pg .im img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transition:transform 1.4s cubic-bezier(.2,.7,.2,1)}
 .pg:hover .im img{transform:scale(1.04)}
 .pg-badge{position:absolute;left:0;top:0;background:var(--red);color:#fff;font-family:var(--f-lat);font-size:12px;font-weight:800;letter-spacing:.14em;padding:10px 14px}
 .pg .tx{padding-top:16px;display:grid;gap:8px;align-content:start}
-.pg-3 .tx{padding-top:0;align-content:center}
+.pg-3 .tx,.pg-4 .tx{padding-top:0;align-content:center}
 .pg h3{font-weight:800;font-size:23px}
 .pg-0 h3{font-size:clamp(24px,2.4vw,34px)}
 .pg h3 .alt{font-size:.62em}
 .pg p{font-size:16px;color:var(--sub);line-height:1.6}
-@media (max-width:900px){.prog{grid-template-columns:1fr}.pg-0,.pg-1,.pg-2,.pg-3{grid-column:1;grid-row:auto}.pg-0 .im{min-height:0;aspect-ratio:4/3;flex:none}.pg-3{flex-direction:column;border-top:0;padding-top:0}.pg-3 .im{flex:none}.pg-3 .tx{padding-top:16px}}
+@media (max-width:900px){.prog{grid-template-columns:1fr}.pg-0,.pg-1,.pg-2,.pg-3,.pg-4{grid-column:1;grid-row:auto}.pg-0 .im{min-height:0;aspect-ratio:4/3;flex:none}.pg-3,.pg-4{flex-direction:column;border-top:0;padding-top:0}.pg-3 .im,.pg-4 .im{flex:none}.pg-3 .tx,.pg-4 .tx{padding-top:16px}}
 
 /* 06 visitor guide */
 .visit{background:var(--paper)}
@@ -306,11 +307,11 @@ html[lang="zh"] .hero h1,html[lang="ja"] .hero h1{font-size:clamp(38px,5.6vw,82p
 .steps li::before{counter-increment:s;content:counter(s,decimal-leading-zero);font-family:var(--f-lat);font-weight:800;font-size:13px;color:var(--red);padding-top:2px}
 @media (max-width:900px){.join-lower{grid-template-columns:1fr;gap:40px}}
 .cats-panel{margin-top:64px}
-.cats{display:grid;grid-template-columns:repeat(6,minmax(0,1fr))}
+.cats{display:grid;grid-template-columns:repeat(7,minmax(0,1fr))}
 .cat{padding:18px 16px 18px 0;display:grid;gap:4px;border-bottom:1px solid var(--line)}
 .cat b{font-size:16px}
 .cat span{font-size:13px;color:var(--sub)}
-@media (max-width:1080px){.cats{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media (max-width:1080px){.cats{grid-template-columns:repeat(4,minmax(0,1fr))}}
 @media (max-width:520px){.cats{grid-template-columns:1fr 1fr}}
 .tbl td:first-child{padding-right:12px}
 
@@ -594,3 +595,4 @@ html[lang="zh"] .hero h1,html[lang="ja"] .hero h1{font-size:clamp(38px,5.6vw,82p
 
 @media (max-width:640px){.pk-img{height:196px}.pk h3{font-size:24px}.pk .pr b{font-size:30px}.pk .btn{min-height:56px}.pk-grid{gap:16px}.hero h1{border-left-width:3px}}
 @media (max-width:760px){.hero{min-height:100svh}.hero-in{padding-bottom:36px;gap:18px}.hero-kick{display:none}.hero-poster{object-position:50% 0}.hero-shade{background:rgba(8,10,14,.38)}.hero h1{font-size:clamp(36px,10vw,44px)}}
+@media (max-width:760px){html[lang="zh"] .hero h1,html[lang="ja"] .hero h1{font-size:clamp(28px,8.4vw,36px);letter-spacing:-.01em}}

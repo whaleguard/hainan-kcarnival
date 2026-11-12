@@ -9,8 +9,8 @@
   const ST_COLOR = { open: "#2FA57C", res: "#E3A02F", conf: "#8E969D" };
   const IMG = {
     cityA: ["img-city-a.jpg", "img-venue-a.jpg"], cityB: ["img-city-b.jpg", "img-venue-b.jpg"],
-    tiles: [["img-food.jpg", "img-venue-a.jpg"], ["img-kbeauty.jpg", "img-beauty.jpg"], ["img-kculture.jpg", "img-dance.jpg"]],
-    prog: [["img-pg-battle.jpg", "img-dance.jpg"], ["img-pg-stage.jpg", "img-stage.jpg"], ["img-pg-photo.jpg", "img-photobooth.jpg"], ["img-hanbok.jpg", "img-beauty.jpg"]],
+    tiles: [["img-food.jpg", "img-venue-a.jpg"], ["img-kbeauty.jpg", "img-beauty.jpg"], ["img-kculture.jpg", "img-dance.jpg"], ["img-kplay.jpg", "img-photobooth.jpg"]],
+    prog: [["img-pg-battle.jpg", "img-dance.jpg"], ["img-pg-stage.jpg", "img-stage.jpg"], ["img-pg-photo.jpg", "img-photobooth.jpg"], ["img-hanbok.jpg", "img-beauty.jpg"], ["img-pg-play.jpg", "img-photobooth.jpg"]],
     pk: { std: ["img-pk-std.jpg", "img-venue-a.jpg"], kitchen: ["img-pk-kitchen.jpg", "img-food.jpg"], showcase: ["img-pk-showcase.jpg", "img-beauty.jpg"] },
     sponsor: ["img-sponsor.jpg", "img-dance.jpg"],
     visit: [["img-visit-a.jpg", "img-hero.jpg"], ["img-visit-b.jpg", "img-venue-b.jpg"]],
@@ -21,11 +21,11 @@
     { amap: "https://uri.amap.com/search?keyword=" + encodeURIComponent("神州半岛") + "&city=469006", baidu: "https://map.baidu.com/search/" + encodeURIComponent("万宁 神州半岛"), google: "https://www.google.com/maps/search/?api=1&query=" + encodeURIComponent("Shenzhou Peninsula Wanning Hainan") }
   ];
 
-  const state = { lang: "ko", venue: "A", sel: null, filter: null, step: 0, faq: 0, openPk: {} };
+  const state = { lang: "zh", venue: "A", sel: null, filter: null, step: 0, faq: 0, openPk: {} };
   try {
-    const saved = localStorage.getItem("hk-lang");
-    if (saved && T[saved]) state.lang = saved;
-    else { const nl = (navigator.language || "ko").slice(0, 2); if (T[nl]) state.lang = nl; }
+    const ql = new URLSearchParams(location.search).get("lang");
+    const saved = localStorage.getItem("hk-lang2");
+    if (ql && T[ql]) state.lang = ql; else if (saved && T[saved]) state.lang = saved;
   } catch (e) {}
 
   const t = () => T[state.lang];
@@ -68,7 +68,7 @@
     }).join("");
 
     // experience tiles
-    $("#tiles").innerHTML = L.tiles.map((x, i) => `<a class="tile" href="#map" data-filter="${["kfood", "beauty", "exp"][i]}">
+    $("#tiles").innerHTML = L.tiles.map((x, i) => `<a class="tile" href="#map" data-filter="${["kfood", "beauty", "exp", "play"][i]}">
       ${img(IMG.tiles[i])}
       <div class="tile-cap"><b class="num">${x[0]}</b><h3>${esc(x[1])}<span>${esc(Al.tiles[i][1])}</span></h3><p>${esc(x[2])}</p></div></a>`).join("");
 
@@ -80,9 +80,9 @@
     $("#map-views").innerHTML = L.views.map((v, i) => `<button type="button" data-view="${["all", "gate", "stage", "booths", "dining"][i]}">${esc(v)}</button>`).join("");
 
     // program — asymmetric
-    $("#programs").innerHTML = L.prog.map((p, i) => `<article class="pg pg-${i}">
+    $("#programs").innerHTML = L.prog.concat([L.prog_play]).map((p, i) => `<article class="pg pg-${i}">
       <div class="im">${img(IMG.prog[i])}${i === 0 ? `<span class="pg-badge">${esc(L.prog_badge)}</span>` : ""}</div>
-      <div class="tx"><h3>${esc(p[0])}${alt(Al.prog[i][0])}</h3><p>${esc(p[1])}</p></div></article>`).join("");
+      <div class="tx"><h3>${esc(p[0])}${alt(Al.prog.concat([Al.prog_play])[i][0])}</h3><p>${esc(p[1])}</p></div></article>`).join("");
 
     // visitor guide
     $("#visit-grid").innerHTML = ["A", "B"].map((k, i) => {
@@ -122,7 +122,7 @@
     // options grouped
     $("#addons").innerHTML = L.opt_groups.map(g => `<div class="opt-g"><h4>${esc(g[0])}</h4><table class="tbl">${g[1].map(i => `<tr><td>${esc(L.addons[i][0])}</td><td>${esc(L.addons[i][1])}</td></tr>`).join("")}</table></div>`).join("");
     $("#terms").innerHTML = L.terms.map(x => `<li>${esc(x)}</li>`).join("");
-    $("#cats").innerHTML = L.cats.map(c => `<div class="cat"><b>${esc(c[0])}</b><span>${esc(c[1])}</span></div>`).join("");
+    $("#cats").innerHTML = L.cats.concat([L.cats_play]).map(c => `<div class="cat"><b>${esc(c[0])}</b><span>${esc(c[1])}</span></div>`).join("");
 
     // support: 3 photo stories + 6 detail rows
     $("#support").innerHTML = `<div class="sup-photos">${L.exh_steps.map((s, i) => `<figure>${img(IMG.sup[i])}<figcaption><span class="num">${s[0]}</span>${esc(s[2])}</figcaption></figure>`).join("")}</div>
@@ -141,7 +141,7 @@
   }
 
   function renderFilter() {
-    const L = t(), keys = ["kfood", "drink", "mealkit", "beauty", "goods", "exp"];
+    const L = t(), keys = ["kfood", "drink", "mealkit", "beauty", "goods", "exp", "play"];
     $("#map-filter").innerHTML = `<button type="button" class="chip-f" data-filter="" aria-pressed="${!state.filter}">ALL</button>` +
       keys.map(k => `<button type="button" class="chip-f" data-filter="${k}" aria-pressed="${state.filter === k}">${esc(ZONES[k][state.lang])}</button>`).join("");
   }
@@ -258,7 +258,7 @@
   function fillSelects(keep) {
     const L = t(), cat = $("#f-cat"), ven = $("#f-venue"), pkg = $("#f-pkg");
     const k = keep || { cat: cat.value, venue: ven.value || "A", pkg: pkg.value || "std", booth: $("#f-booth").value };
-    cat.innerHTML = L.cats.map((c, i) => `<option value="${i}">${esc(c[0])}</option>`).join("");
+    cat.innerHTML = L.cats.concat([L.cats_play]).map((c, i) => `<option value="${i}">${esc(c[0])}</option>`).join("");
     ven.innerHTML = ["A", "B", "AB"].map((v, i) => `<option value="${v}">${esc(L.f.venues[i])}</option>`).join("");
     pkg.innerHTML = PK_ORDER.map(p => `<option value="${p}">${esc(L.pk[p].name)}</option>`).join("");
     if (k.cat) cat.value = k.cat;
@@ -314,7 +314,7 @@
     const hit = findBooth(id); if (!hit) return;
     $("#f-venue").value = hit.v; fillBooths(hit.b.id);
     $("#f-pkg").value = hit.b.pkg; renderEst();
-    $("#f-cat").value = String({ kfood: 0, mealkit: 1, beauty: 2, goods: 3, exp: 4, drink: 5 }[hit.b.zone]);
+    $("#f-cat").value = String({ kfood: 0, mealkit: 1, beauty: 2, goods: 3, exp: 4, drink: 5, play: 6 }[hit.b.zone]);
     state.step = 1; renderStepper();
   }
 
@@ -323,7 +323,7 @@
     if (!T[l]) return;
     const keep = { cat: $("#f-cat").value, venue: $("#f-venue").value || "A", pkg: $("#f-pkg").value || "std", booth: $("#f-booth").value };
     state.lang = l;
-    try { localStorage.setItem("hk-lang", l); } catch (e) {}
+    try { localStorage.setItem("hk-lang2", l); } catch (e) {}
     fillSelects(keep); renderStatic(); renderEst(); renderMapPanel(); observeReveal();
     if (window.Map3D) window.Map3D.setLang(l);
   }

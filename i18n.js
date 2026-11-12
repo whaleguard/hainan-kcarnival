@@ -14,7 +14,8 @@ window.ZONES = {
   beauty:  { ko: "K-뷰티", zh: "韩国美妆", en: "K-Beauty", ja: "Kビューティー" },
   goods:   { ko: "K-POP 굿즈", zh: "K-POP周边", en: "K-POP goods", ja: "K-POPグッズ" },
   exp:     { ko: "체험·포토", zh: "体验·拍照", en: "Experience & photo", ja: "体験・フォト" },
-  drink:   { ko: "음료·주류", zh: "饮品·酒类", en: "Drinks & liquor", ja: "ドリンク・酒類" }
+  drink:   { ko: "음료·주류", zh: "饮品·酒类", en: "Drinks & liquor", ja: "ドリンク・酒類" },
+  play:    { ko: "오락·전통놀이", zh: "娱乐·传统游戏", en: "Games & play", ja: "遊び・伝統遊戯" }
 };
 
 /* 부스 이름 사전 */
@@ -47,6 +48,8 @@ const N = {
   pcard:   ["포토카드 자판기", "小卡自动售货机", "Photocard Vending", "フォトカード自販機"],
   cheer:   ["응원용품", "应援用品", "Fan Cheering Goods", "応援グッズ"],
   chara:   ["캐릭터 굿즈", "角色周边", "Character Goods", "キャラクターグッズ"],
+  saju:    ["사주 키오스크", "韩国四柱运势机", "Saju Fortune Kiosk", "四柱推命キオスク"],
+  trad:    ["전통놀이 체험", "韩国传统游戏体验", "Korean Folk Games", "韓国伝統遊び体験"],
   mirror:  ["미러 포토부스", "镜面拍照亭", "Mirror Photo Booth", "ミラーフォトブース"],
   hanbok:  ["한복 체험", "韩服体验", "Hanbok Experience", "韓服体験"],
   color:   ["퍼스널컬러", "个人色彩诊断", "Personal Color", "パーソナルカラー"]
@@ -88,8 +91,8 @@ window.BOOTHS = {
     B("B17", "device", "beauty", "std", "open"),
     B("B18", "kgoods", "goods", "std", "open"),
     B("B19", "pcard", "goods", "std", "conf"),
-    B("B20", "cheer", "goods", "std", "open"),
-    B("B21", "chara", "goods", "std", "open"),
+    B("B20", "saju", "play", "std", "open"),
+    B("B21", "trad", "play", "std", "open"),
     B("B22", "mirror", "exp", "std", "res"),
     B("B23", "hanbok", "exp", "std", "open"),
     B("B24", "color", "exp", "std", "open")

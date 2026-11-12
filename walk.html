@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="ko">
+<html lang="zh">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1">
@@ -9,7 +9,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;600;700;800&family=Noto+Sans+JP:wght@400;500;700;900&family=Noto+Sans+KR:wght@400;500;700;900&family=Noto+Sans+SC:wght@400;500;700;900&display=swap">
-<link rel="stylesheet" href="style.css?v=33">
+<link rel="stylesheet" href="style.css?v=35">
 <style>
   html,body{height:100%;overflow:hidden;background:var(--night);color:#fff}
   body{display:flex;flex-direction:column;padding-top:env(safe-area-inset-top,0px)}
@@ -53,17 +53,17 @@
   <button type="button" id="btn-rotate" aria-pressed="false" hidden></button>
 </div>
 
-<script src="i18n.js?v=33"></script>
-<script src="i18n-fix.js?v=33"></script>
-<script src="menu.js?v=33"></script>
+<script src="i18n.js?v=35"></script>
+<script src="i18n-fix.js?v=35"></script>
+<script src="menu.js?v=35"></script>
 <script>
 (function () {
   "use strict";
   window.WALK_PAGE = true;
   const q = new URLSearchParams(location.search);
   let lang = q.get("lang");
-  if (!T[lang]) { try { lang = localStorage.getItem("hk-lang"); } catch (e) {} }
-  if (!T[lang]) { const nl = (navigator.language || "ko").slice(0, 2); lang = T[nl] ? nl : "ko"; }
+  if (!T[lang]) { try { lang = localStorage.getItem("hk-lang2"); } catch (e) {} }
+  if (!T[lang]) lang = "zh";
   const state = { lang, venue: q.get("venue") === "B" ? "B" : "A", sel: null };
   window.App = { get state() { return state; }, select() {}, clearSel() {} };
   const $$ = s => Array.from(document.querySelectorAll(s));
@@ -80,7 +80,7 @@
   render();
   document.addEventListener("click", e => {
     const lb = e.target.closest("[data-lang]");
-    if (lb) { state.lang = lb.dataset.lang; try { localStorage.setItem("hk-lang", state.lang); } catch (er) {} render(); window.Map3D && window.Map3D.setLang(state.lang); return; }
+    if (lb) { state.lang = lb.dataset.lang; try { localStorage.setItem("hk-lang2", state.lang); } catch (er) {} render(); window.Map3D && window.Map3D.setLang(state.lang); return; }
     const tb = e.target.closest("[data-venue]");
     if (tb && tb.dataset.venue !== state.venue) { state.venue = tb.dataset.venue; render(); if (window.Map3D) { window.Map3D.setVenue(state.venue); window.Map3D.enterWalk(true); } return; }
     const ab = e.target.closest("[data-apply-booth]");
@@ -94,6 +94,6 @@
   document.getElementById("wk-close").addEventListener("click", () => { window.close(); setTimeout(() => { location.href = "index.html#map"; }, 200); });
 })();
 </script>
-<script type="module" src="map3d.js?v=33"></script>
+<script type="module" src="map3d.js?v=35"></script>
 </body>
 </html>
