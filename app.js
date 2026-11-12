@@ -62,13 +62,13 @@
           <p class="city-dates num">${esc(c.dates)}</p>
           <p class="city-tag">${esc(c.tag)}<span>${esc(ca.tag)}</span></p>
           <ul class="city-facts">${c.facts.map(f => `<li>${esc(f)}</li>`).join("")}</ul>
-          <div class="city-cta"><a class="btn btn-light" href="#visit">${esc(L.city_more)}</a><a class="link-arrow light" href="#map" data-goto="${k}"><span>${esc(L.city_3d)}</span><i aria-hidden="true"></i></a></div>
+          <div class="city-cta"><a class="btn btn-light" href="${k === "A" ? "haikou" : "wanning"}.html">${esc(L.city_more)}</a><a class="link-arrow light" href="#map" data-goto="${k}"><span>${esc(L.city_3d)}</span><i aria-hidden="true"></i></a></div>
         </div>
       </article>`;
     }).join("");
 
     // experience tiles
-    $("#tiles").innerHTML = L.tiles.map((x, i) => `<a class="tile" href="#map" data-filter="${["kfood", "beauty", "exp", "play"][i]}">
+    $("#tiles").innerHTML = L.tiles.map((x, i) => `<a class="tile" href="${["kfood", "kbeauty", "battle", "playzone"][i]}.html">
       ${img(IMG.tiles[i])}
       <div class="tile-cap"><b class="num">${x[0]}</b><h3>${esc(x[1])}<span>${esc(Al.tiles[i][1])}</span></h3><p>${esc(x[2])}</p></div></a>`).join("");
 
@@ -80,9 +80,9 @@
     $("#map-views").innerHTML = L.views.map((v, i) => `<button type="button" data-view="${["all", "gate", "stage", "booths", "dining"][i]}">${esc(v)}</button>`).join("");
 
     // program — asymmetric
-    $("#programs").innerHTML = L.prog.concat([L.prog_play]).map((p, i) => `<article class="pg pg-${i}">
+    $("#programs").innerHTML = L.prog.concat([L.prog_play]).map((p, i) => `<a class="pg pg-${i}" href="${["battle", "stage", "photozone", "hanbok", "playzone"][i]}.html">
       <div class="im">${img(IMG.prog[i])}${i === 0 ? `<span class="pg-badge">${esc(L.prog_badge)}</span>` : ""}</div>
-      <div class="tx"><h3>${esc(p[0])}${alt(Al.prog.concat([Al.prog_play])[i][0])}</h3><p>${esc(p[1])}</p></div></article>`).join("");
+      <div class="tx"><h3>${esc(p[0])}${alt(Al.prog.concat([Al.prog_play])[i][0])}</h3><p>${esc(p[1])}</p><span class="more">${esc(L.more_detail)} →</span></div></a>`).join("");
 
     // visitor guide
     $("#visit-grid").innerHTML = ["A", "B"].map((k, i) => {
@@ -94,6 +94,8 @@
       </article>`;
     }).join("");
 
+    $("#visit-more").innerHTML = `<a class="btn btn-dark" href="guide.html">${esc(L.guide_more)}</a>`;
+    $("#exh-more").innerHTML = `<a class="btn btn-light" href="exhibitor.html">${esc(L.exh_more)}</a>`;
     // exhibitor steps
     $("#exh-steps").innerHTML = L.exh_steps.map((s, i) => `<li><span class="num">${s[0]}</span><b>${esc(s[1])}<small>${esc(Al.exh_steps[i][1])}</small></b><em>${esc(s[2])}</em><p>${esc(s[3])}</p></li>`).join("");
 
@@ -109,6 +111,7 @@
           <div class="pr"><b class="num">₩${fmt(P.price)}</b><span>${esc(p.unit)}</span></div>
           <button type="button" class="pk-toggle" data-pk="${k}" aria-expanded="${open}">${esc(open ? L.pk_less : L.pk_more)}</button>
           <ul ${open ? "" : "hidden"}>${p.items.map(i => `<li>${esc(i)}</li>`).join("")}</ul>
+          <a class="pk-more" href="pk-${k}.html">${esc(L.more_detail)} →</a>
           <a class="btn ${k === "kitchen" ? "btn-red" : "btn-dark"}" href="#apply" data-pick="${k}">${esc(L.pk_pick)}</a>
         </div></article>`;
     }).join("");
@@ -117,7 +120,7 @@
       <div class="sp-body"><span class="en">SPONSOR</span><h3>${esc(L.sponsor_title)}${alt(A().sponsor_title)}</h3><p>${esc(L.sponsor_text)}</p>
       <ul>${sp.items.map(i => `<li>${esc(i)}</li>`).join("")}</ul>
       <div class="pr"><b class="num">₩${fmt(PKG.sponsor.price)}</b><span>${esc(sp.unit)}</span></div>
-      <a class="btn btn-light" href="#apply" data-pick="sponsor">${esc(L.pk_pick)}</a></div>`;
+      <div class="btns"><a class="btn btn-light" href="#apply" data-pick="sponsor">${esc(L.pk_pick)}</a><a class="btn btn-line light" href="sponsor.html">${esc(L.more_detail)}</a></div></div>`;
 
     // options grouped
     $("#addons").innerHTML = L.opt_groups.map(g => `<div class="opt-g"><h4>${esc(g[0])}</h4><table class="tbl">${g[1].map(i => `<tr><td>${esc(L.addons[i][0])}</td><td>${esc(L.addons[i][1])}</td></tr>`).join("")}</table></div>`).join("");
@@ -390,5 +393,7 @@
   try {
     const qb = new URLSearchParams(location.search).get("booth");
     if (qb && findBooth(qb)) { applyBooth(qb); setTimeout(() => $("#apply").scrollIntoView({ behavior: "smooth" }), 400); }
+    const qp = new URLSearchParams(location.search).get("pkg");
+    if (qp && PKG[qp]) { $("#f-pkg").value = qp; renderEst(); state.step = 1; renderStepper(); setTimeout(() => $("#apply").scrollIntoView({ behavior: "smooth" }), 400); }
   } catch (e) {}
 })();

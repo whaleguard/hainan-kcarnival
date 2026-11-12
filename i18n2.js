@@ -164,3 +164,13 @@ ja: {
   };
   for (const l in X) Object.assign(window.T[l], X[l]);
 })();
+
+(function () {
+  const M = {
+    ko: { more_detail: "자세히 보기", guide_more: "방문 가이드 전체 보기", exh_more: "참가업체 가이드 보기" },
+    zh: { more_detail: "查看详情", guide_more: "查看完整游客指南", exh_more: "查看参展商指南" },
+    en: { more_detail: "View details", guide_more: "Full visitor guide", exh_more: "Exhibitor guide" },
+    ja: { more_detail: "詳しく見る", guide_more: "来場ガイドをすべて見る", exh_more: "出展者ガイドを見る" }
+  };
+  for (const l in M) Object.assign(window.T[l], M[l]);
+})();
