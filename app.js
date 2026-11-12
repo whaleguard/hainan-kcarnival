@@ -235,6 +235,14 @@
     setTimeout(() => { btn.textContent = t().copy; }, 1800);
   }
 
+  function applyBooth(id) {
+    const hit = findBooth(id); if (!hit) return;
+    $("#f-venue").value = hit.v; fillBooths(hit.b.id);
+    $("#f-pkg").value = hit.b.pkg; renderEst();
+    const ci = { kfood: 0, mealkit: 1, beauty: 2, goods: 3, exp: 4, drink: 5 }[hit.b.zone];
+    $("#f-cat").value = String(ci);
+  }
+
   /* ---------- language ---------- */
   function setLang(l) {
     if (!T[l]) return;
@@ -253,14 +261,7 @@
     const go = e.target.closest("[data-goto]"); if (go) { setVenue(go.dataset.goto); return; }
     const pick = e.target.closest("[data-pick]"); if (pick) { $("#f-pkg").value = pick.dataset.pick; calc(); renderEst(); return; }
     const ab = e.target.closest("[data-apply-booth]");
-    if (ab) {
-      const hit = findBooth(ab.dataset.applyBooth);
-      $("#f-venue").value = hit.v; fillBooths(hit.b.id);
-      $("#f-pkg").value = hit.b.pkg; renderEst();
-      const ci = { kfood: 0, mealkit: 1, beauty: 2, goods: 3, exp: 4, drink: 5 }[hit.b.zone];
-      $("#f-cat").value = String(ci);
-      return;
-    }
+    if (ab) { applyBooth(ab.dataset.applyBooth); return; }
     if (e.target.closest("[data-next-open]")) {
       const nb = boothsOf(state.venue).find(b => b.st === "open"); if (nb) select(nb.id); return;
     }
@@ -307,4 +308,9 @@
   };
 
   renderStatic(); fillSelects(); renderEst(); renderMapPanel();
+  // arriving from the walk-in page with a booth chosen
+  try {
+    const qb = new URLSearchParams(location.search).get("booth");
+    if (qb && findBooth(qb)) { applyBooth(qb); setTimeout(() => $("#apply").scrollIntoView({ behavior: "smooth" }), 400); }
+  } catch (e) {}
 })();

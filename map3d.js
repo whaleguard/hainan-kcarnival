@@ -61,6 +61,8 @@ controls.maxDistance = 130;
 controls.autoRotate = true;
 controls.autoRotateSpeed = 0.45;
 controls.screenSpacePanning = false;
+const WALK_PAGE = !!window.WALK_PAGE;
+if (!WALK_PAGE) { controls.enableZoom = false; renderer.domElement.style.touchAction = "pan-y"; } // overview on the long page never hijacks page scroll
 
 /* lights: tropical dusk */
 scene.add(new THREE.HemisphereLight(0xBFD9E6, 0x3A2A22, 0.85));
@@ -540,7 +542,6 @@ function buildVenueA() {
   [[-28, -12], [-28, -2], [-28, 8], [-27, 16], [24, 12], [26, 17], [20, 18], [-12, 20], [8, 20]].forEach(([px, pz], i) => { const p = palm(6 + (i % 3), 0.2 + (i % 2) * 0.1); p.position.set(px, 0, pz); p.rotation.y = i; g.add(p); });
   [[-25, 18], [17, 19], [27, 6]].forEach(([px, pz]) => { const t = roundTree(1); t.position.set(px, 0, pz); g.add(t); });
   landmark("qilou", g, -6, 21.5, -25, 1.5);
-  landmark("entry", g, -2, 3.2, 21.5, 1.0);
 
   backdrop("bg-haikou.jpg", g, 170, 3);
   loadPeople(figs => {
@@ -652,6 +653,7 @@ function buildVenueB() {
     const side = i % 2 ? 1 : -1;
     const px = i < 14 ? -44 + i * 6.8 : side * (40 + (i % 3) * 3);
     const pzz = i < 14 ? 25 + (i % 3) * 1.6 : -20 + (i - 14) * 3.5;
+    if (i < 14 && Math.abs(px + 2) < 5) continue;
     const p = palm(6.5 + (i % 4), 0.2 + (i % 3) * 0.12); p.position.set(px, 0, pzz); p.rotation.y = i * 1.3; g.add(p);
   }
   landmark("sea", g, 0, 2.5, 46, 1.8);
@@ -676,7 +678,8 @@ function camTo(pos, target, instant) {
 }
 let tween = null;
 function setVenue(v) {
-  if (walk.on) exitWalk();
+  if (walk.on && WALK_PAGE) { walk.on = false; walk.booth = null; walk.dest = null; hud.view.hidden = true; }
+  else if (walk.on) exitWalk();
   current = v;
   venues.A.visible = v === "A"; venues.B.visible = v === "B";
   setActive(null);
@@ -737,7 +740,7 @@ renderer.domElement.addEventListener("pointermove", e => {
 controls.addEventListener("start", () => { tween = null; });
 /* ---------- walk mode: enter the venue as a visitor (like 용마미식거리 3D) ---------- */
 const walk = { on: false, booth: null, keys: {}, joy: null, dest: null, onArrive: null, colliders: [], dirty: true, near: null, phase: 0 };
-const SPAWN = { A: [-2, 21.5], B: [-2, 24.5] };
+const SPAWN = { A: [-2, 21], B: [-2, 23.2] };
 const BOUNDS = { A: [-29, 30, -18.5, 23.5], B: [-37, 37, -21, 27] };
 const RADIUS = 0.38, SPEED = 4.2;
 
@@ -796,7 +799,7 @@ const hud = {
 const LT = () => window.T[window.App.state.lang];
 const ALT = () => window.T[window.App.state.lang === "zh" ? "ko" : "zh"];
 
-function enterWalk() {
+function enterWalk(instant) {
   if (walk.on) return;
   walk.on = true; walk.booth = null; walk.dest = null;
   computeColliders(); buildGrid();
@@ -806,9 +809,9 @@ function enterWalk() {
   Object.assign(controls, { minDistance: 3, maxDistance: 18, maxPolarAngle: 1.45, enablePan: false });
   for (const id in boothIndex) boothIndex[id].marker.scale.setScalar(1.1);
   const tgt = new THREE.Vector3(s[0], 1.5, s[1]);
-  camTo(new THREE.Vector3(s[0], 4.2, s[1] + 7.5), tgt, false);
+  camTo(new THREE.Vector3(s[0] + 2.4, 6.8, s[1] + 9.5), tgt, !!instant);
   setActive(null);
-  hud.el.hidden = false; hud.cta.hidden = true; hud.view.hidden = true;
+  hud.el.hidden = false; if (hud.cta) hud.cta.hidden = true; hud.view.hidden = true;
   stage.classList.add("walking");
 }
 function exitWalk() {
@@ -817,7 +820,7 @@ function exitWalk() {
   visitor.visible = false;
   Object.assign(controls, { minDistance: 12, maxDistance: 130, maxPolarAngle: 1.32, enablePan: true });
   for (const id in boothIndex) boothIndex[id].marker.scale.setScalar(1.7);
-  hud.el.hidden = true; hud.view.hidden = true; hud.cta.hidden = false; hud.prompt.hidden = true;
+  hud.el.hidden = true; hud.view.hidden = true; if (hud.cta) hud.cta.hidden = false; hud.prompt.hidden = true;
   stage.classList.remove("walking");
   camTo(venues[current].userData.cam, venues[current].userData.target, false);
 }
@@ -934,7 +937,7 @@ addEventListener("keydown", e => {
   if (k === "escape") { walk.booth ? leaveBooth() : exitWalk(); }
 });
 addEventListener("keyup", e => { walk.keys[e.key.toLowerCase()] = false; });
-(function joystick() {
+WALK_PAGE && (function joystick() {
   const j = hud.joy, knob = j.querySelector("i"); let id = null, c = null;
   j.addEventListener("pointerdown", e => { id = e.pointerId; j.setPointerCapture(id); const r = j.getBoundingClientRect(); c = [r.left + r.width / 2, r.top + r.height / 2]; move(e); e.stopPropagation(); });
   j.addEventListener("pointermove", e => { if (e.pointerId === id) move(e); });
@@ -947,10 +950,18 @@ addEventListener("keyup", e => { walk.keys[e.key.toLowerCase()] = false; });
     walk.joy = [dx / R, dy / R]; walk.dest = null; if (walk.booth) leaveBooth();
   }
 })();
-hud.prompt.addEventListener("click", () => { if (walk.near) enterBooth(walk.near); });
-document.getElementById("walk-exit").addEventListener("click", exitWalk);
-hud.cta.addEventListener("click", enterWalk);
-document.getElementById("btn-walk").addEventListener("click", () => (walk.on ? exitWalk() : enterWalk()));
+function openWalk() {
+  const u = `walk.html?venue=${current}&lang=${window.App.state.lang}`;
+  const w = window.open(u, "hk-walk");
+  if (!w) location.href = u;
+}
+if (WALK_PAGE) {
+  hud.prompt.addEventListener("click", () => { if (walk.near) enterBooth(walk.near); });
+  document.getElementById("walk-exit").addEventListener("click", () => { window.close(); setTimeout(() => { location.href = "index.html#map"; }, 200); });
+} else {
+  hud.cta && hud.cta.addEventListener("click", openWalk);
+  const bw = document.getElementById("btn-walk"); bw && bw.addEventListener("click", openWalk);
+}
 
 const _v = new THREE.Vector3(), _f = new THREE.Vector3(), _r = new THREE.Vector3();
 function walkStep(dt) {
@@ -1065,5 +1076,11 @@ window.Map3D = {
   enterWalk, exitWalk, _dirty() { walk.dirty = true; }
 };
 // sync with any state chosen before the module loaded
-if (window.App.state.venue !== "A") setVenue(window.App.state.venue);
-if (window.App.state.sel) focus(window.App.state.sel);
+if (WALK_PAGE) {
+  current = window.App.state.venue === "B" ? "B" : "A";
+  venues.A.visible = current === "A"; venues.B.visible = current === "B";
+  enterWalk(true);
+} else {
+  if (window.App.state.venue !== "A") setVenue(window.App.state.venue);
+  if (window.App.state.sel) focus(window.App.state.sel);
+}

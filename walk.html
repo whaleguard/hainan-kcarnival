@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1">
+<title>행사장 입장 · 海南中韩文化美食嘉年华</title>
+<meta name="theme-color" content="#0C1620">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' fill='%230E0E0E'/%3E%3Crect x='14' y='14' width='36' height='36' fill='none' stroke='%23D7261E' stroke-width='6'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;600;700;800&family=Noto+Sans+JP:wght@400;500;700;900&family=Noto+Sans+KR:wght@400;500;700;900&family=Noto+Sans+SC:wght@400;500;700;900&display=swap">
+<link rel="stylesheet" href="style.css?v=21">
+<style>
+  html,body{height:100%;overflow:hidden;background:var(--night);color:#fff}
+  body{display:flex;flex-direction:column;padding-top:env(safe-area-inset-top,0px)}
+  body::before{background:var(--night)}
+  .wk-bar{flex:none;display:flex;align-items:center;gap:20px;height:58px;padding:0 max(16px,env(safe-area-inset-right,0px)) 0 max(16px,env(safe-area-inset-left,0px));border-bottom:1px solid var(--night-line);background:var(--night)}
+  .wk-bar .logo{color:#fff}.wk-bar .logo-txt span{color:rgba(255,255,255,.6)}
+  .wk-bar .tabs{margin-left:12px}
+  .wk-bar .langs{margin-left:auto;border-left-color:var(--night-line)}
+  .wk-bar .langs button{color:rgba(255,255,255,.5)}
+  .wk-bar .langs button[aria-pressed="true"]{color:#fff}
+  .wk-stage{flex:1;height:auto;min-height:0;position:relative}
+  .walk-exit{display:none}
+  .wk-close{flex:none;background:#fff;color:var(--ink);border:0;height:36px;padding:0 14px;font-weight:700;font-size:13px;cursor:pointer}
+  .wk-close:hover{background:var(--red);color:#fff}
+  @media (max-width:760px){.wk-bar .tabs button small{display:none}.wk-bar{gap:10px}.wk-bar .logo-txt{display:none}.wk-bar .tabs{margin-left:0;gap:14px}.wk-bar .tabs button{font-size:13px}.wk-bar .langs button{padding:6px 4px;font-size:11px}}
+</style>
+<script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"}}</script>
+</head>
+<body>
+<header class="wk-bar">
+  <a class="logo" href="index.html" aria-label="Home"><span class="logo-mark" aria-hidden="true"></span><span class="logo-txt"><b>HAINAN K-CARNIVAL</b><span data-t="logo_sub"></span></span></a>
+  <div class="tabs" role="tablist">
+    <button type="button" role="tab" id="tab-A" data-venue="A"></button>
+    <button type="button" role="tab" id="tab-B" data-venue="B"></button>
+  </div>
+  <div class="langs" role="group" aria-label="Language">
+    <button type="button" data-lang="ko">KO</button><button type="button" data-lang="zh">中文</button><button type="button" data-lang="en">EN</button><button type="button" data-lang="ja">日本語</button>
+  </div>
+  <button type="button" class="wk-close" id="wk-close" data-t="walk_exit"></button>
+</header>
+<div class="stage3d wk-stage" id="stage3d">
+  <div class="map-loading" id="map-loading" data-t="map_loading"></div>
+  <div class="walk-hud" id="walk-hud" hidden>
+    <button type="button" class="walk-exit" id="walk-exit"></button>
+    <p class="walk-hint" data-t="walk_hint"></p>
+    <button type="button" class="walk-prompt" id="walk-prompt" hidden></button>
+    <div class="joy" id="joy" aria-hidden="true"><i></i></div>
+  </div>
+  <div class="booth-view" id="booth-view" hidden></div>
+  <button type="button" id="btn-rotate" aria-pressed="false" hidden></button>
+</div>
+
+<script src="i18n.js?v=21"></script>
+<script>
+(function () {
+  "use strict";
+  window.WALK_PAGE = true;
+  const q = new URLSearchParams(location.search);
+  let lang = q.get("lang");
+  if (!T[lang]) { try { lang = localStorage.getItem("hk-lang"); } catch (e) {} }
+  if (!T[lang]) { const nl = (navigator.language || "ko").slice(0, 2); lang = T[nl] ? nl : "ko"; }
+  const state = { lang, venue: q.get("venue") === "B" ? "B" : "A", sel: null };
+  window.App = { get state() { return state; }, select() {}, clearSel() {} };
+  const $$ = s => Array.from(document.querySelectorAll(s));
+  function render() {
+    const L = T[state.lang];
+    document.documentElement.lang = state.lang;
+    document.title = (L.walk_enter || "") + " · " + L.logo_sub;
+    $$("[data-t]").forEach(el => { const v = L[el.dataset.t]; if (typeof v === "string") el.textContent = v; });
+    document.getElementById("tab-A").innerHTML = `${L.tabA[0]}<small>${L.tabA[1]}</small>`;
+    document.getElementById("tab-B").innerHTML = `${L.tabB[0]}<small>${L.tabB[1]}</small>`;
+    $$(".tabs button").forEach(b => b.setAttribute("aria-selected", b.dataset.venue === state.venue));
+    $$(".langs button").forEach(b => b.setAttribute("aria-pressed", b.dataset.lang === state.lang));
+  }
+  render();
+  document.addEventListener("click", e => {
+    const lb = e.target.closest("[data-lang]");
+    if (lb) { state.lang = lb.dataset.lang; try { localStorage.setItem("hk-lang", state.lang); } catch (er) {} render(); window.Map3D && window.Map3D.setLang(state.lang); return; }
+    const tb = e.target.closest("[data-venue]");
+    if (tb && tb.dataset.venue !== state.venue) { state.venue = tb.dataset.venue; render(); if (window.Map3D) { window.Map3D.setVenue(state.venue); window.Map3D.enterWalk(true); } return; }
+    const ab = e.target.closest("[data-apply-booth]");
+    if (ab) {
+      e.preventDefault();
+      const url = `index.html?booth=${encodeURIComponent(ab.dataset.applyBooth)}#apply`;
+      try { if (window.opener && !window.opener.closed) { window.opener.location.href = url; window.opener.focus(); window.close(); return; } } catch (er) {}
+      location.href = url;
+    }
+  });
+  document.getElementById("wk-close").addEventListener("click", () => { window.close(); setTimeout(() => { location.href = "index.html#map"; }, 200); });
+})();
+</script>
+<script type="module" src="map3d.js?v=21"></script>
+</body>
+</html>
