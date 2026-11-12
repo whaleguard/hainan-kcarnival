@@ -98,6 +98,7 @@ window.BOOTHS = {
 
 window.T = {
 ko: {
+  walk_exhibitor: "입점 안내", 
   walk_enter: "입장하기", walk_cta: "행사장 입장하기 · 새 창", walk_exit: "닫기", walk_hint: "땅을 누르면 그 자리로 걸어갑니다 · WASD/방향키 · 드래그로 시점 회전", walk_enterbooth: "{id}번 {name} 부스 입장", walk_inbooth: "부스 안", walk_vacant: "이 자리에 귀사 브랜드가 들어갈 수 있습니다", walk_leave: "부스 나가기", 
   html_title: "하이난 중한문화미식 카니발 2026–2027 · 참가업체 모집",
   logo_sub: "하이난 중한문화미식 카니발",
@@ -170,6 +171,7 @@ ko: {
   ft_note: "모집 조건과 금액은 주최측 최종 확정 전 안내 기준이며 변경될 수 있습니다."
 },
 zh: {
+  walk_exhibitor: "招商信息", 
   walk_enter: "进场", walk_cta: "进入会场 · 新窗口", walk_exit: "关闭", walk_hint: "点击地面即可走过去 · WASD/方向键 · 拖动旋转视角", walk_enterbooth: "进入{id}号 {name} 展位", walk_inbooth: "展位内", walk_vacant: "贵公司品牌可入驻此位置", walk_leave: "离开展位", 
   html_title: "海南中韩文化美食嘉年华 2026–2027 · 参展商招募",
   logo_sub: "海南中韩文化美食嘉年华",
@@ -242,6 +244,7 @@ zh: {
   ft_note: "招商条件与金额为主办方最终确认前的参考标准，可能有所调整。"
 },
 en: {
+  walk_exhibitor: "For exhibitors", 
   walk_enter: "Walk in", walk_cta: "Walk in · opens a new window", walk_exit: "Close", walk_hint: "Tap the ground to walk there · WASD/arrow keys · drag to look around", walk_enterbooth: "Enter booth {id} · {name}", walk_inbooth: "Inside the booth", walk_vacant: "Your brand can take this spot", walk_leave: "Leave booth", 
   html_title: "Hainan Korea–China Culture & Food Carnival 2026–2027 · Call for Exhibitors",
   logo_sub: "Korea–China Culture & Food Carnival",
@@ -314,6 +317,7 @@ en: {
   ft_note: "Terms and fees are guidelines pending the organizer's final confirmation and may change."
 },
 ja: {
+  walk_exhibitor: "出展案内", 
   walk_enter: "入場する", walk_cta: "会場に入る · 新しいウィンドウ", walk_exit: "閉じる", walk_hint: "地面をタップするとそこへ歩きます · WASD/矢印キー · ドラッグで視点回転", walk_enterbooth: "{id}番 {name} ブースに入る", walk_inbooth: "ブース内", walk_vacant: "貴社ブランドが出店できる場所です", walk_leave: "ブースを出る", 
   html_title: "海南 中韓文化グルメカーニバル 2026–2027 · 出展者募集",
   logo_sub: "海南 中韓文化グルメカーニバル",

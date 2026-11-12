@@ -223,6 +223,26 @@ function pole(x, z, h, parent) {
 
 /* ---------- booth ---------- */
 const boothMeshes = [];   // for raycast
+const menuBoards = [];
+function drawMenuBoard(mb) {
+  const items = window.MENU ? window.MENU.items(mb.b.id) : [];
+  const W = 380, H = 532, c = document.createElement("canvas"); c.width = W; c.height = H; const x = c.getContext("2d");
+  x.fillStyle = "#1E1A17"; x.fillRect(0, 0, W, H); x.strokeStyle = "#C89B5A"; x.lineWidth = 8; x.strokeRect(4, 4, W - 8, H - 8);
+  x.fillStyle = "#FFF6E6"; x.textAlign = "center"; x.font = `800 30px ${FONT}`; x.fillText(mb.b.name.ko, W / 2, 46);
+  x.fillStyle = "#F2B84B"; x.font = `600 22px ${FONT}`; x.fillText(mb.b.name.zh, W / 2, 76);
+  const rowH = Math.min(108, (H - 100) / Math.max(1, items.length));
+  const pending = [];
+  items.forEach((it, i) => {
+    const y = 96 + i * rowH, src = window.MENU.img[it.sheet + ":" + it.cell];
+    x.fillStyle = "#2C2622"; x.fillRect(16, y, W - 32, rowH - 10);
+    if (src) pending.push(new Promise(res => { const im = new Image(); im.onload = () => { x.drawImage(im, 22, y + 6, rowH - 22, rowH - 22); res(); }; im.onerror = res; im.src = src; }));
+    x.textAlign = "left"; x.fillStyle = "#FFF6E6"; x.font = `700 21px ${FONT}`; x.fillText(it.name("ko").slice(0, 11), rowH + 12, y + rowH / 2 - 6);
+    x.fillStyle = "#C9BBA6"; x.font = `500 17px ${FONT}`; x.fillText(it.name("zh").slice(0, 12), rowH + 12, y + rowH / 2 + 18);
+    x.textAlign = "right"; x.fillStyle = "#F2B84B"; x.font = `800 26px Outfit,${FONT}`; x.fillText("¥" + it.price, W - 26, y + rowH / 2 + 8);
+  });
+  Promise.all(pending).then(() => { const t = texOf(c); if (mb.mat.map) mb.mat.map.dispose(); mb.mat.map = t; mb.mat.needsUpdate = true; });
+}
+if (window.MENU) window.MENU.onReady(() => setTimeout(() => { menuBoards.forEach(drawMenuBoard); if (walk.booth) renderBoothView(walk.booth); }, 0));
 const boothIndex = {};    // id -> {group, marker, sign, booth}
 const signRefs = [];      // regenerate on language change
 
@@ -275,6 +295,11 @@ function makeBooth(b, parent, x, z, rotY) {
   // marker
   const marker = new THREE.Sprite(new THREE.SpriteMaterial({ map: markerTexture(b.id, b.st, false), depthTest: false, transparent: true }));
   marker.scale.set(1.7, 1.7, 1); marker.position.set(0, 6.1, 0); marker.renderOrder = 12; g.add(marker);
+  const board = new THREE.Group(); board.position.set(1.45, 0, 2.95); board.rotation.y = -0.18; g.add(board);
+  const bm = new THREE.MeshBasicMaterial({ color: 0xffffff, toneMapped: false });
+  const face = new THREE.Mesh(new THREE.PlaneGeometry(0.95, 1.33), bm); face.position.set(0, 0.95, 0); face.rotation.x = -0.12; board.add(face);
+  [-0.44, 0.44].forEach(x => box(0.05, 1.5, 0.05, M(0x3A2A1E), x, 0.72, -0.06, board));
+  menuBoards.push({ b, mat: bm });
   parent.add(g);
   boothIndex[b.id] = { group: g, marker, booth: b, baseY: 6.1 };
   signRefs.push({ mesh: sign, b });
@@ -405,7 +430,9 @@ function loadPeople(cb) {
     if (figs.length) cb(figs);
   });
 }
-function scatterPeople(parent, figs, n, area, avoid, seed) {
+/* crowd agents: every visitor sprite strolls between free spots, pauses, looks around; the stage audience cheers in place */
+const crowd = [];
+function scatterPeople(parent, figs, n, area, avoid, seed, mode = "roam") {
   let s = seed;
   const rnd = () => { s = (s * 16807) % 2147483647; return (s - 1) / 2147483646; };
   const mats = figs.map(f => new THREE.SpriteMaterial({ map: f.tex, alphaTest: 0.5 }));
@@ -417,6 +444,60 @@ function scatterPeople(parent, figs, n, area, avoid, seed) {
     const i = Math.floor(rnd() * figs.length), h = 1.55 + rnd() * 0.3;
     const sp = new THREE.Sprite(mats[i]); sp.center.set(0.5, 0); sp.scale.set(h * figs[i].aspect, h, 1); sp.position.set(px, 0.02, pz);
     parent.add(sp); placed++;
+    crowd.push({ sp, key: parent.userData.key, area, mode, w: h * figs[i].aspect, speed: 0.75 + rnd() * 0.65, tx: px, tz: pz,
+      wait: rnd() * 5, phase: rnd() * 6.28, hop: mode === "audience" && rnd() < 0.55, seed: rnd() });
+  }
+}
+const crowdCols = {};
+function collidersFor(key) {
+  const now = performance.now(), c = crowdCols[key];
+  if (c && now - c.t < 12000) return c.list;
+  const v = venues[key]; v.updateMatrixWorld(true);
+  const list = [], box3 = new THREE.Box3(), wp = new THREE.Vector3();
+  v.traverse(o => {
+    if (o.userData.solid) { box3.setFromObject(o, true); if (isFinite(box3.min.x)) list.push({ t: "b", x0: box3.min.x, x1: box3.max.x, z0: box3.min.z, z1: box3.max.z }); }
+    else if (o.userData.solidR) { o.getWorldPosition(wp); list.push({ t: "c", x: wp.x, z: wp.z, r: o.userData.solidR }); }
+  });
+  crowdCols[key] = { t: now, list };
+  return list;
+}
+function crowdFree(key, area, x, z) {
+  if (x < area[0] || x > area[1] || z < area[2] || z > area[3]) return false;
+  for (const c of collidersFor(key)) {
+    if (c.t === "b") { if (x > c.x0 - 0.3 && x < c.x1 + 0.3 && z > c.z0 - 0.3 && z < c.z1 + 0.3) return false; }
+    else if ((x - c.x) ** 2 + (z - c.z) ** 2 < (c.r + 0.3) ** 2) return false;
+  }
+  return true;
+}
+function crowdPath(a, tx, tz) {
+  const x0 = a.sp.position.x, z0 = a.sp.position.z, d = Math.hypot(tx - x0, tz - z0), n = Math.ceil(d / 0.5);
+  for (let k = 1; k <= n; k++) if (!crowdFree(a.key, a.area, x0 + (tx - x0) * k / n, z0 + (tz - z0) * k / n)) return false;
+  return true;
+}
+const _camR = new THREE.Vector3();
+function updateCrowd(dt, t) {
+  if (!dt || !crowd.length) return;
+  _camR.setFromMatrixColumn(camera.matrixWorld, 0);
+  for (const a of crowd) {
+    if (a.key !== current) continue;
+    const p = a.sp.position;
+    if (a.mode === "audience") { p.y = 0.02 + (a.hop ? Math.max(0, Math.sin(t * 5.5 + a.seed * 20)) * 0.12 : 0); continue; }
+    if (a.wait > 0) { a.wait -= dt; p.y = 0.02; continue; }
+    const dx = a.tx - p.x, dz = a.tz - p.z, d = Math.hypot(dx, dz);
+    if (d < 0.1) {
+      a.wait = 1 + Math.random() * 5;
+      for (let k = 0; k < 6; k++) {
+        const nx = p.x + (Math.random() - 0.5) * 14, nz = p.z + (Math.random() - 0.5) * 14;
+        if (crowdFree(a.key, a.area, nx, nz) && crowdPath(a, nx, nz)) { a.tx = nx; a.tz = nz; break; }
+      }
+      continue;
+    }
+    const step = Math.min(d, a.speed * dt);
+    p.x += dx / d * step; p.z += dz / d * step;
+    a.phase += dt * a.speed * 7;
+    p.y = 0.02 + Math.abs(Math.sin(a.phase)) * 0.05;
+    const side = (dx * _camR.x + dz * _camR.z) / d;
+    if (Math.abs(side) > 0.25) a.sp.scale.x = (side < 0 ? -1 : 1) * a.w;
   }
 }
 
@@ -546,9 +627,9 @@ function buildVenueA() {
   backdrop("bg-haikou.jpg", g, 170, 3);
   loadPeople(figs => {
     scatterPeople(g, figs, 120, [-16, 11, -10, 20], [[-21.5, -16.5, -10, 13], [-11.5, 7.5, -15.5, -10.5], [9, 19, -7, 3], [-7, 3, 16, 19]], 7);
-    scatterPeople(g, figs, 34, [6, 9.5, -6, 3], [], 11);  // audience in front of the stage
+    scatterPeople(g, figs, 34, [6, 9.5, -6, 3], [], 11, "audience");  // audience in front of the stage
   });
-  Object.assign(g.userData, { cam: new THREE.Vector3(26, 34, 46), target: new THREE.Vector3(-2, 0, 1) });
+  Object.assign(g.userData, { key: "A", cam: new THREE.Vector3(26, 34, 46), target: new THREE.Vector3(-2, 0, 1) });
   return g;
 }
 function buildGate(parent, x, z, rotY, ko, zh) {
@@ -660,9 +741,9 @@ function buildVenueB() {
   backdrop("bg-beach.jpg", g, 190, 3);
   loadPeople(figs => {
     scatterPeople(g, figs, 190, [-30, 30, -14, 19], [[-35.5, -30.5, -13, 19], [-25, 25, -19.5, -14.5], [30.5, 35.5, -13, 19], [13, 28, -6, 10], [-7, 3, 19, 23]], 3);
-    scatterPeople(g, figs, 40, [9, 13, -5, 9], [], 5);
+    scatterPeople(g, figs, 40, [9, 13, -5, 9], [], 5, "audience");
   });
-  Object.assign(g.userData, { cam: new THREE.Vector3(40, 46, 66), target: new THREE.Vector3(0, 0, 0) });
+  Object.assign(g.userData, { key: "B", cam: new THREE.Vector3(40, 46, 66), target: new THREE.Vector3(0, 0, 0) });
   return g;
 }
 
@@ -901,19 +982,29 @@ function enterBooth(id) {
   // visitor steps up to the counter, camera takes the customer's eye view
   const st = bf.pos.clone().add(bf.fwd.clone().multiplyScalar(2.9));
   visitor.position.set(st.x, 0, st.z); visitor.rotation.y = Math.atan2(-bf.fwd.x, -bf.fwd.z);
-  const eye = bf.pos.clone().add(bf.fwd.clone().multiplyScalar(6.2)).add(new THREE.Vector3(0, 2.3, 0));
-  camTo(eye, bf.pos.clone().add(new THREE.Vector3(0, 1.7, 0)), false);
+  const eye = bf.pos.clone().add(bf.fwd.clone().multiplyScalar(4.4)).add(new THREE.Vector3(0, 2.0, 0));
+  camTo(eye, bf.pos.clone().add(new THREE.Vector3(0, 1.45, 0)), false);
   setActive(id); window.App.select(id);
+  visitor.visible = false;
   renderBoothView(id);
   hud.view.hidden = false; hud.prompt.hidden = true;
 }
 function leaveBooth() {
   if (!walk.booth) return;
   const bf = boothFront(walk.booth);
-  walk.booth = null; hud.view.hidden = true; setActive(null);
+  walk.booth = null; hud.view.hidden = true; setActive(null); visitor.visible = true;
   visitor.position.set(bf.stand.x, 0, bf.stand.z);
   const back = bf.stand.clone().add(bf.fwd.clone().multiplyScalar(6)).add(new THREE.Vector3(0, 4, 0));
   camTo(back, bf.stand.clone().add(new THREE.Vector3(0, 1.5, 0)), false);
+}
+function menuBlock(id) {
+  if (!window.MENU) return "";
+  const items = window.MENU.items(id); if (!items.length) return "";
+  const lg = window.App.state.lang, al = lg === "zh" ? "ko" : "zh";
+  return `<div class="bv-menu"><p class="menu-h">${esc(window.MENU.title[lg])}<span>${esc(window.MENU.title[al])}</span></p>
+    <ul>${items.map(it => { const src = window.MENU.img[it.sheet + ":" + it.cell];
+      return `<li>${src ? `<img src="${src}" alt="">` : `<i class="ph"></i>`}<span class="mn">${esc(it.name(lg))}<small>${esc(it.name(al))}</small></span><b>¥${it.price}</b></li>`; }).join("")}</ul>
+    <p class="menu-note">${esc(window.MENU.note[lg])}</p></div>`;
 }
 function esc(t) { return String(t).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c])); }
 function renderBoothView(id) {
@@ -922,8 +1013,10 @@ function renderBoothView(id) {
   hud.view.innerHTML = `
     <div class="bv-head"><span class="bv-no" style="background:${ST_HEX[b.st]}">${b.id}</span>
       <div><p class="bv-kicker">${esc(L.walk_inbooth)} · ${esc(A.walk_inbooth)}</p><h3>${esc(b.name[lang])}<span>${esc(b.name[alt])}</span></h3></div></div>
+    ${menuBlock(b.id)}
+    <details class="bv-more"><summary>${esc(L.walk_exhibitor || "입점 안내")} · ${esc(A.walk_exhibitor || "")}</summary>
     <p class="bv-status ${b.st}">${esc(L.st[b.st])}${b.st === "open" ? " — " + esc(L.walk_vacant) : ""}</p>
-    <dl><dt>${esc(L.card.zone)}</dt><dd>${esc(window.ZONES[b.zone][lang])}</dd><dt>${esc(L.card.size)}</dt><dd>${L.size_booth}</dd><dt>${esc(L.card.pkg)}</dt><dd>${esc(p.name)} · ${esc(p.for)}</dd><dt>${esc(L.card.price)}</dt><dd><b>${price}</b> ${esc(p.unit)}</dd></dl>
+    <dl><dt>${esc(L.card.zone)}</dt><dd>${esc(window.ZONES[b.zone][lang])}</dd><dt>${esc(L.card.size)}</dt><dd>${L.size_booth}</dd><dt>${esc(L.card.pkg)}</dt><dd>${esc(p.name)} · ${esc(p.for)}</dd><dt>${esc(L.card.price)}</dt><dd><b>${price}</b> ${esc(p.unit)}</dd></dl></details>
     <div class="bv-btns">${b.st !== "conf" ? `<a class="btn btn-light" href="#apply" data-apply-booth="${b.id}">${esc(L.card.apply)}</a>` : ""}<button type="button" class="btn btn-line-light" id="bv-leave">${esc(L.walk_leave)}</button></div>`;
   document.getElementById("bv-leave").onclick = leaveBooth;
 }
@@ -1060,6 +1153,7 @@ function loop() {
     if (seaMat) seaMat.emissiveIntensity = 0.35 + Math.sin(t * 0.8) * 0.08;
     lanternMeshes.forEach((l, i) => { l.material.emissiveIntensity = 1 + Math.sin(t * 2 + i) * 0.25; });
   }
+  if (!reduce) updateCrowd(dt, t);
   if (walk.on) walkStep(dt);
   controls.update();
   composer.render();
@@ -1073,13 +1167,15 @@ window.Map3D = {
   reset() { setActive(null); controls.autoRotate = document.getElementById("btn-rotate").getAttribute("aria-pressed") === "true"; camTo(venues[current].userData.cam, venues[current].userData.target, false); },
   setRotate(on) { controls.autoRotate = on && !reduce; },
   setLang() { if (walk.booth) renderBoothView(walk.booth); walk.near = null; },
-  enterWalk, exitWalk, _dirty() { walk.dirty = true; }
+  enterWalk, exitWalk, _dirty() { walk.dirty = true; }, _enter: id => enterBooth(id), goBooth: id => walkToBooth(id)
 };
 // sync with any state chosen before the module loaded
 if (WALK_PAGE) {
   current = window.App.state.venue === "B" ? "B" : "A";
   venues.A.visible = current === "A"; venues.B.visible = current === "B";
   enterWalk(true);
+  const qb = new URLSearchParams(location.search).get("booth");
+  if (qb && boothIndex[qb]) setTimeout(() => walkToBooth(qb), 600);
 } else {
   if (window.App.state.venue !== "A") setVenue(window.App.state.venue);
   if (window.App.state.sel) focus(window.App.state.sel);

@@ -110,6 +110,7 @@
     el.innerHTML = `<div class="card">
       <div class="card-head"><span class="card-no" style="background:${ST_COLOR[b.st]}">${b.id}</span>
         <div style="display:grid;gap:4px;min-width:0"><h3>${esc(b.name[state.lang])}${alt(b.name[altL()])}</h3><span class="status ${ST_CLASS[b.st]}">${esc(L.st[b.st])}</span></div></div>
+      ${menuHtml(b.id)}
       <dl class="kv">
         <dt>${esc(L.card.zone)}</dt><dd>${esc(ZONES[b.zone][state.lang])}</dd>
         <dt>${esc(L.card.size)}</dt><dd class="num">${L.size_booth}</dd>
@@ -119,6 +120,17 @@
       ${canApply ? `<a class="btn btn-dark" href="#apply" data-apply-booth="${b.id}">${esc(L.card.apply)}</a>` : `<button type="button" class="btn btn-line" data-next-open>${esc(L.card.other)}</button>`}
     </div>`;
   }
+
+  function menuHtml(id) {
+    if (!window.MENU) return "";
+    const items = MENU.items(id); if (!items.length) return "";
+    const lg = state.lang, al = altL();
+    return `<div class="menu"><p class="menu-h">${esc(MENU.title[lg])}<span>${esc(MENU.title[al])}</span></p>
+      <ul>${items.map(it => { const src = MENU.img[it.sheet + ":" + it.cell];
+        return `<li>${src ? `<img src="${src}" alt="">` : `<i class="ph"></i>`}<span class="mn">${esc(it.name(lg))}<small>${esc(it.name(al))}</small></span><b>¥${it.price}</b></li>`; }).join("")}</ul>
+      <p class="menu-note">${esc(MENU.note[lg])}</p></div>`;
+  }
+  if (window.MENU) MENU.onReady(() => renderCard());
 
   function select(id, fromMap) {
     state.sel = id;
