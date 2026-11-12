@@ -825,9 +825,10 @@ const SPAWN = { A: [-2, 21], B: [-2, 23.2] };
 const BOUNDS = { A: [-29, 30, -18.5, 23.5], B: [-37, 37, -21, 27] };
 const RADIUS = 0.38, SPEED = 4.2;
 
-function buildVisitor() {
+function buildVisitor(opt = {}) {
   const g = new THREE.Group();
-  const skin = M(0xF1C7A5), hair = M(0x1E1A18), top = M(0xD7261E), pants = M(0x22303C), shoe = M(0xF2F2F2);
+  const shirt = opt.shirt ?? 0xD7261E;
+  const skin = M(0xF1C7A5), hair = M(opt.hair ?? 0x1E1A18), top = M(shirt), pants = M(opt.pants ?? 0x22303C), shoe = M(0xF2F2F2);
   const legGeo = new THREE.CapsuleGeometry(0.085, 0.62, 4, 10);
   const armGeo = new THREE.CapsuleGeometry(0.065, 0.5, 4, 10);
   const legL = new THREE.Group(), legR = new THREE.Group(), armL = new THREE.Group(), armR = new THREE.Group();
@@ -838,9 +839,13 @@ function buildVisitor() {
   const hr = new THREE.Mesh(new THREE.SphereGeometry(0.178, 24, 14, 0, Math.PI * 2, 0, Math.PI * 0.55), hair); hr.position.y = 1.69; hr.rotation.x = -0.25; g.add(hr);
   [-0.06, 0.06].forEach(x => { const e = new THREE.Mesh(new THREE.SphereGeometry(0.02, 8, 6), M(0x111111)); e.position.set(x, 1.68, 0.155); g.add(e); });
   // ring under the visitor so they are easy to find in the crowd
-  const ring = new THREE.Mesh(new THREE.RingGeometry(0.42, 0.52, 40), new THREE.MeshBasicMaterial({ color: 0xD7261E, transparent: true, opacity: 0.85, side: THREE.DoubleSide }));
-  ring.rotation.x = -Math.PI / 2; ring.position.y = 0.03; g.add(ring);
-  const tag = labelSprite("나", "我", 0.55, { f1: 34, f2: 28, bg: "rgba(215,38,30,.95)", c2: "#FFFFFF" });
+  if (!opt.remote) {
+    const ring = new THREE.Mesh(new THREE.RingGeometry(0.42, 0.52, 40), new THREE.MeshBasicMaterial({ color: 0xD7261E, transparent: true, opacity: 0.85, side: THREE.DoubleSide }));
+    ring.rotation.x = -Math.PI / 2; ring.position.y = 0.03; g.add(ring);
+  }
+  const tag = opt.remote
+    ? labelSprite(opt.l1, opt.l2, 0.42, { f1: 30, f2: 24, bg: "rgba(12,22,32,.88)", c2: "#9FD3FF" })
+    : labelSprite("나", "我", 0.55, { f1: 34, f2: 28, bg: "rgba(215,38,30,.95)", c2: "#FFFFFF" });
   tag.position.y = 2.25; g.add(tag);
   g.userData.limbs = { legL, legR, armL, armR };
   g.visible = false;
@@ -1056,6 +1061,102 @@ if (WALK_PAGE) {
   const bw = document.getElementById("btn-walk"); bw && bw.addEventListener("click", openWalk);
 }
 
+
+/* ---------- live visitors: everyone in the walk-in page sees each other (public MQTT relay, no server needed — same approach as 용마) ---------- */
+const NET = { client: null, sid: null, peers: new Map(), venue: null, last: 0, lastSent: "", name: null, color: 0 };
+const NS = "hainankcarnival/v1";
+const BROKERS = ["wss://broker.emqx.io:8084/mqtt", "wss://broker.hivemq.com:8884/mqtt", "wss://test.mosquitto.org:8081"];
+const SHIRTS = [0x2E64A8, 0x2FA57C, 0xE3A02F, 0x8E44AD, 0x16A3B8, 0xE67E22, 0x34495E, 0xC0392B, 0x27AE60, 0xF1C40F];
+function netIdentity() {
+  let id = null;
+  try { id = JSON.parse(sessionStorage.getItem("hk-visitor") || "null"); } catch (e) {}
+  if (!id) {
+    const a = new Uint8Array(6); crypto.getRandomValues(a);
+    id = { sid: [...a].map(b => b.toString(16).padStart(2, "0")).join(""), no: String(1000 + (a[0] * 256 + a[1]) % 9000), c: a[2] % SHIRTS.length };
+    try { sessionStorage.setItem("hk-visitor", JSON.stringify(id)); } catch (e) {}
+  }
+  NET.sid = id.sid; NET.no = id.no; NET.color = id.c;
+}
+const onlineEl = document.getElementById("walk-online");
+function renderOnline() {
+  if (!onlineEl) return;
+  const n = [...NET.peers.values()].filter(p => p.venue === current).length + 1;
+  const L = LT(), A = ALT();
+  onlineEl.innerHTML = `<i></i>${(L.walk_online || "접속 {n}명").replace("{n}", n)}<span>${(A.walk_online || "").replace("{n}", n)}</span>`;
+  onlineEl.hidden = false;
+}
+async function netStart() {
+  if (!WALK_PAGE || NET.client) return;
+  netIdentity();
+  let mqtt;
+  if (/[?&]nettest=1/.test(location.search)) {   // offline self-test: a fake relay that echoes a second visitor
+    mqtt = { connect() { const h = {}; const c = { connected: true, on(e, f) { (h[e] ||= []).push(f); }, once(e, f) { if (e === "connect") setTimeout(f, 10); }, subscribe() {}, end() {},
+      publish(t, msg) { const m = JSON.parse(msg); const echo = { ...m, sid: "test01", no: "7777", c: 3, x: m.x + 2, z: m.z - 1 }; (h.message || []).forEach(f => f(`${NS}/p/test01`, JSON.stringify(echo))); } }; return c; } };
+  } else {
+    try { const m = await import("https://cdn.jsdelivr.net/npm/mqtt@5.10.1/dist/mqtt.esm.js"); mqtt = m.default || m; } catch (e) { return; }
+  }
+  for (const url of BROKERS) {
+    try {
+      NET.client = await new Promise((res, rej) => {
+        const c = mqtt.connect(url, { clientId: "hk_" + NET.sid + "_" + Math.random().toString(16).slice(2, 6), clean: true, keepalive: 20, connectTimeout: 7000, reconnectPeriod: 4000,
+          will: { topic: `${NS}/bye`, payload: JSON.stringify({ sid: NET.sid }), qos: 0, retain: false } });
+        const t = setTimeout(() => { c.end(true); rej(new Error("timeout")); }, 8000);
+        c.once("connect", () => { clearTimeout(t); res(c); });
+        c.once("error", err => { clearTimeout(t); c.end(true); rej(err); });
+      });
+      break;
+    } catch (e) { NET.client = null; }
+  }
+  if (!NET.client) return;
+  NET.client.subscribe([`${NS}/p/+`, `${NS}/bye`]);
+  NET.client.on("message", (topic, buf) => {
+    let m; try { m = JSON.parse(buf.toString()); } catch (e) { return; }
+    if (!m || m.sid === NET.sid) return;
+    if (topic.endsWith("/bye")) { dropPeer(m.sid); return; }
+    if (typeof m.x !== "number" || typeof m.z !== "number" || !/^[AB]$/.test(m.v)) return;
+    let p = NET.peers.get(m.sid);
+    if (!p) {
+      const no = String(m.no || "").replace(/\D/g, "").slice(0, 4) || "0000";
+      const av = buildVisitor({ remote: true, shirt: SHIRTS[(m.c | 0) % SHIRTS.length], l1: "방문객 " + no, l2: "游客 " + no });
+      av.visible = true; p = { av, x: m.x, z: m.z, ry: m.ry || 0, venue: m.v, seen: 0, phase: 0 };
+      av.position.set(m.x, 0, m.z); NET.peers.set(m.sid, p);
+    }
+    p.tx = m.x; p.tz = m.z; p.try = m.ry || 0; p.venue = m.v; p.seen = performance.now(); p.booth = m.b || null;
+    renderOnline();
+  });
+  NET.client.on("close", () => {});
+  addEventListener("pagehide", () => { try { NET.client.publish(`${NS}/bye`, JSON.stringify({ sid: NET.sid })); NET.client.end(true); } catch (e) {} });
+  renderOnline();
+}
+function dropPeer(sid) {
+  const p = NET.peers.get(sid); if (!p) return;
+  scene.remove(p.av); NET.peers.delete(sid); renderOnline();
+}
+function netTick(dt) {
+  const now = performance.now();
+  // publish my position: fast while moving, heartbeat while still
+  if (NET.client && NET.client.connected && walk.on) {
+    const v = visitor.position, msg = { sid: NET.sid, no: NET.no, c: NET.color, v: current, x: +v.x.toFixed(2), z: +v.z.toFixed(2), ry: +visitor.rotation.y.toFixed(2), b: walk.booth };
+    const key = msg.x + "," + msg.z + "," + msg.v + "," + msg.b;
+    if ((key !== NET.lastSent && now - NET.last > 150) || now - NET.last > 4000) {
+      NET.client.publish(`${NS}/p/${NET.sid}`, JSON.stringify(msg)); NET.last = now; NET.lastSent = key;
+    }
+  }
+  for (const [sid, p] of NET.peers) {
+    if (now - p.seen > 15000) { dropPeer(sid); continue; }
+    p.av.visible = p.venue === current;
+    if (!p.av.visible) continue;
+    const dx = p.tx - p.av.position.x, dz = p.tz - p.av.position.z, d = Math.hypot(dx, dz);
+    const k = Math.min(1, dt * 8);
+    p.av.position.x += dx * k; p.av.position.z += dz * k;
+    let dr = p.try - p.av.rotation.y; dr = Math.atan2(Math.sin(dr), Math.cos(dr)); p.av.rotation.y += dr * k;
+    const moving = d > 0.05; p.phase = moving ? p.phase + dt * 9 : p.phase * 0.85;
+    const sw = Math.sin(p.phase) * (moving ? 0.6 : 0), L = p.av.userData.limbs;
+    L.legL.rotation.x = sw; L.legR.rotation.x = -sw; L.armL.rotation.x = -sw * 0.8; L.armR.rotation.x = sw * 0.8;
+  }
+}
+if (WALK_PAGE) setTimeout(netStart, 800);
+
 const _v = new THREE.Vector3(), _f = new THREE.Vector3(), _r = new THREE.Vector3();
 function walkStep(dt) {
   if (!dt) return;
@@ -1155,6 +1256,7 @@ function loop() {
   }
   if (!reduce) updateCrowd(dt, t);
   if (walk.on) walkStep(dt);
+  if (WALK_PAGE) { netTick(dt); if (NET.client && Math.random() < 0.01) renderOnline(); }
   controls.update();
   composer.render();
 }
