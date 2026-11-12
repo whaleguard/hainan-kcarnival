@@ -889,7 +889,7 @@ function enterWalk(instant) {
   if (walk.on) return;
   walk.on = true; walk.booth = null; walk.dest = null;
   computeColliders(); buildGrid();
-  const s = SPAWN[current];
+  const s0 = SPAWN[current], s = [s0[0] + (Math.random() - 0.5) * 3.2, s0[1] + (Math.random() - 0.5) * 1.2];  // spread arrivals so visitors don't stack
   visitor.position.set(s[0], 0, s[1]); visitor.rotation.y = Math.PI; visitor.visible = true;
   controls.autoRotate = false; document.getElementById("btn-rotate").setAttribute("aria-pressed", "false");
   Object.assign(controls, { minDistance: 3, maxDistance: 18, maxPolarAngle: 1.45, enablePan: false });
