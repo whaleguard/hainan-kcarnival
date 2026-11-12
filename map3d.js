@@ -581,6 +581,22 @@ function buildVenueA() {
   // walkway (Qilou street) at south
   const walk = new THREE.Mesh(new THREE.PlaneGeometry(64, 5), M(0x6E655A));
   walk.rotation.x = -Math.PI / 2; walk.position.set(0, 0.01, 21.5); walk.receiveShadow = true; g.add(walk);
+  // 长堤路 (road) south of the plaza, then the 海甸河 riverside
+  {
+    const rc = document.createElement("canvas"); rc.width = 1024; rc.height = 128; const r = rc.getContext("2d");
+    r.fillStyle = "#2A2D31"; r.fillRect(0, 0, 1024, 128);
+    r.fillStyle = "#D9D3C4"; for (let i = 0; i < 1024; i += 64) r.fillRect(i, 62, 34, 4);
+    r.fillStyle = "#E8C547"; r.fillRect(0, 4, 1024, 3); r.fillRect(0, 121, 1024, 3);
+    const road = new THREE.Mesh(new THREE.PlaneGeometry(160, 14), new THREE.MeshStandardMaterial({ map: texOf(rc), roughness: 0.95 }));
+    road.rotation.x = -Math.PI / 2; road.position.set(0, -0.02, 31); g.add(road);
+    box(160, 0.18, 0.4, M(0x9A958C), 0, 0.09, 24.1, g);
+    const side = new THREE.Mesh(new THREE.PlaneGeometry(160, 4), M(0x6E655A)); side.rotation.x = -Math.PI / 2; side.position.set(0, -0.01, 40); g.add(side);
+    box(160, 0.9, 0.25, M(0xCFC8B8), 0, 0.45, 42, g);
+    const river = new THREE.Mesh(new THREE.PlaneGeometry(220, 120), new THREE.MeshStandardMaterial({ color: 0x1E3A4A, roughness: 0.25, metalness: 0.3 }));
+    river.rotation.x = -Math.PI / 2; river.position.set(0, -0.6, 102); g.add(river);
+    const outer = new THREE.Mesh(new THREE.PlaneGeometry(220, 60), M(0x4E5257)); outer.rotation.x = -Math.PI / 2; outer.position.set(0, -0.05, -10); outer.position.y = -0.04; g.add(outer);
+    for (let i = -70; i <= 70; i += 14) { const lp = new THREE.Group(); lp.position.set(i, 0, 38.6); g.add(lp); box(0.14, 6, 0.14, M(0x2A2F33), 0, 3, 0, lp); box(1.2, 0.12, 0.3, M(0x2A2F33), 0.5, 6, 0, lp); const bulb = new THREE.Mesh(new THREE.SphereGeometry(0.22, 10, 8), new THREE.MeshBasicMaterial({ color: 0xFFE2A8 })); bulb.position.set(1, 5.85, 0); lp.add(bulb); }
+  }
   buildXiaNanyang(g);
 
   const A = window.BOOTHS.A, byId = Object.fromEntries(A.map(b => [b.id, b]));

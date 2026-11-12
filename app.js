@@ -14,7 +14,7 @@
     pk: { std: ["img-pk-std.jpg", "img-venue-a.jpg"], kitchen: ["img-pk-kitchen.jpg", "img-food.jpg"], showcase: ["img-pk-showcase.jpg", "img-beauty.jpg"] },
     sponsor: ["img-sponsor.jpg", "img-dance.jpg"],
     visit: [["img-visit-a.jpg", "img-hero.jpg"], ["img-visit-b.jpg", "img-venue-b.jpg"]],
-    sup: [["img-sup-logistics.jpg", "img-venue-a.jpg"], ["img-sup-pay.jpg", "img-food.jpg"], ["img-b2b.jpg", "img-beauty.jpg"]]
+    sup: [["img-sup-logistics.jpg", "img-venue-a.jpg"], ["img-sup-pay.jpg", "img-food.jpg"], ["img-sup-promo.jpg", "img-kbeauty.jpg"]]
   };
   const MAPLINK = [
     { amap: "https://uri.amap.com/search?keyword=" + encodeURIComponent("夏南洋·骑楼烟火食集") + "&city=460100", baidu: "https://map.baidu.com/search/" + encodeURIComponent("海口 夏南洋骑楼烟火食集"), google: "https://www.google.com/maps/search/?api=1&query=" + encodeURIComponent("海口 骑楼老街 长堤路34号") },
