@@ -64,7 +64,7 @@ controls.screenSpacePanning = false;
 
 /* lights: tropical dusk */
 scene.add(new THREE.HemisphereLight(0xBFD9E6, 0x3A2A22, 0.85));
-const sun = new THREE.DirectionalLight(0xFFD2A6, 1.6);
+const sun = new THREE.DirectionalLight(0xFFC89A, 1.25);
 sun.position.set(-40, 55, 30);
 sun.castShadow = true;
 sun.shadow.mapSize.set(2048, 2048);
@@ -183,7 +183,7 @@ function parasolSet() {
   const top = cyl(0.55, 0.55, 0.06, M(0xE9E2D3), 16); top.position.y = 0.75; g.add(top);
   const leg = cyl(0.05, 0.05, 0.75, M(0x444A50), 6); leg.position.y = 0.37; g.add(leg);
   const pole = cyl(0.04, 0.04, 2.5, M(0xCFC8BA), 6); pole.position.y = 1.4; g.add(pole);
-  const can = new THREE.Mesh(new THREE.ConeGeometry(1.55, 0.55, 8, 1, true), M(0xF4EFE6, { side: THREE.DoubleSide, roughness: 0.9 }));
+  const can = new THREE.Mesh(new THREE.ConeGeometry(1.55, 0.55, 8, 1, true), M(0xD9D2C4, { side: THREE.DoubleSide, roughness: 0.9 }));
   can.position.y = 2.55; can.castShadow = true; g.add(can);
   for (let i = 0; i < 4; i++) {
     const a = i * Math.PI / 2 + Math.PI / 4;
@@ -488,7 +488,7 @@ function buildVenueA() {
   const gt = texOf(c); gt.wrapS = gt.wrapT = THREE.RepeatWrapping; gt.repeat.set(16, 12);
   const groundMat = new THREE.MeshStandardMaterial({ map: gt, roughness: 0.9 });
   const ground = new THREE.Mesh(new THREE.PlaneGeometry(64, 48), groundMat);
-  loadTex("tex-paving.jpg", t => { t.wrapS = t.wrapT = THREE.RepeatWrapping; t.repeat.set(16, 12); groundMat.map = t; groundMat.needsUpdate = true; });
+  loadTex("tex-paving.jpg", t => { t.wrapS = t.wrapT = THREE.RepeatWrapping; t.repeat.set(16, 12); groundMat.map = t; groundMat.color.set(0x7d7d7d); groundMat.needsUpdate = true; });
   ground.rotation.x = -Math.PI / 2; ground.receiveShadow = true; g.add(ground);
   // walkway (Qilou street) at south
   const walk = new THREE.Mesh(new THREE.PlaneGeometry(64, 5), M(0x6E655A));
@@ -574,12 +574,12 @@ function buildVenueB() {
   const g = new THREE.Group();
   const sandMat = new THREE.MeshStandardMaterial({ color: 0xC7B08A, roughness: 1 });
   const sand = new THREE.Mesh(new THREE.PlaneGeometry(96, 64), sandMat);
-  loadTex("tex-sand.jpg", t => { t.wrapS = t.wrapT = THREE.RepeatWrapping; t.repeat.set(14, 10); sandMat.map = t; sandMat.color.set(0xffffff); sandMat.needsUpdate = true; });
+  loadTex("tex-sand.jpg", t => { t.wrapS = t.wrapT = THREE.RepeatWrapping; t.repeat.set(14, 10); sandMat.map = t; sandMat.color.set(0xa89a82); sandMat.needsUpdate = true; });
   sand.rotation.x = -Math.PI / 2; sand.position.z = -4; sand.receiveShadow = true; g.add(sand);
   // event deck (plaza)
   const deckMat = new THREE.MeshStandardMaterial({ color: 0x7A756E, roughness: 0.9 });
   const deck = new THREE.Mesh(new THREE.PlaneGeometry(72, 40), deckMat);
-  loadTex("tex-paving.jpg", t => { const tt = t.clone(); tt.wrapS = tt.wrapT = THREE.RepeatWrapping; tt.repeat.set(18, 10); tt.needsUpdate = true; deckMat.map = tt; deckMat.color.set(0xffffff); deckMat.needsUpdate = true; });
+  loadTex("tex-paving.jpg", t => { const tt = t.clone(); tt.wrapS = tt.wrapT = THREE.RepeatWrapping; tt.repeat.set(18, 10); tt.needsUpdate = true; deckMat.map = tt; deckMat.color.set(0x7d7d7d); deckMat.needsUpdate = true; });
   deck.rotation.x = -Math.PI / 2; deck.position.set(0, 0.02, -1); deck.receiveShadow = true; g.add(deck);
   // boardwalk
   box(80, 0.12, 3, M(0x8A6A4A), 0, 0.06, 21, g);
