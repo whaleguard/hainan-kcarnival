@@ -591,12 +591,13 @@ function buildVenueB() {
   foam.rotation.x = -Math.PI / 2; foam.position.set(0, -0.1, 28.6); g.add(foam);
   const shore = new THREE.Mesh(new THREE.PlaneGeometry(260, 12), new THREE.MeshStandardMaterial({ color: 0xD8C39C, roughness: 1 }));
   shore.rotation.x = -Math.PI / 2; shore.position.set(0, -0.05, 28); g.add(shore);
-  // distant resort hotels (north) + hills
+  // distant resort hotels (north) + hills — hotels give way to the photo backdrop once it loads
+  const hotels = new THREE.Group(); g.add(hotels); g.userData.onBackdrop = () => { hotels.visible = false; };
   [[-40, -46, 18, 22], [-14, -50, 26, 30], [16, -48, 20, 26], [42, -44, 16, 18]].forEach(([hx, hz, w, h], i) => {
-    box(w, h, 10, M(i % 2 ? 0xE9E4DA : 0xDCD5C8), hx, h / 2, hz, g);
+    box(w, h, 10, M(i % 2 ? 0xE9E4DA : 0xDCD5C8), hx, h / 2, hz, hotels);
     for (let f = 2; f < h - 1; f += 2.4) {
       const win = new THREE.Mesh(new THREE.PlaneGeometry(w - 2, 0.7), new THREE.MeshStandardMaterial({ color: 0xFFD493, emissive: 0xFFB255, emissiveIntensity: (f + i) % 3 < 1 ? 0.9 : 0.2 }));
-      win.position.set(hx, f, hz + 5.02); g.add(win);
+      win.position.set(hx, f, hz + 5.02); hotels.add(win);
     }
   });
   [[-70, -70, 28], [-20, -80, 34], [40, -78, 30], [80, -66, 24]].forEach(([hx, hz, r]) => {
