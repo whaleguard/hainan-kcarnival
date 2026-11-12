@@ -1,0 +1,220 @@
+window.DETAILS = window.DETAILS || {};
+window.DETAILS.en = {
+  _ui: {
+    home: "Home", back: "Back to Main", related: "You May Also Like", apply: "Apply to Participate", walk: "Explore the 3D Venue", map: "View on Map",
+    menu: "Food & Products", booth: "Booth", status: "Status", price: "Price", note_img: "Images are conceptual renderings of the event venue.",
+    tbd: "To Be Announced", visitor: "Visitors", exhibitor: "Exhibitors", contents: "Contents", top: "Back to Top", pkg_incl: "What's Included", from: "From"
+  },
+
+  haikou: {
+    group: "visitor", kicker: "VENUE 01 · HAIKOU", title: "Haikou · Qilou Old Street (骑楼老街)",
+    lead: "Celebrate the year-end season at the century-old Qilou Old Street (骑楼老街). A six-day Korean cultural and food festival takes place at North Gate Square, right in front of Xianan Yang · Qilou Food Market (夏南洋·骑楼烟火食集).",
+    hero: "img-city-a.jpg", walk: "A",
+    facts: [["Dates", "2026.12.24 – 12.29 (6 days)"], ["Location", "No. 34 Changdi Road (长堤路34号), Haikou · North Gate Square, in front of Xianan Yang · Qilou Food Market (夏南洋·骑楼烟火食集)"], ["Scale", "9 retail booths · 1 cultural performance stage · 16 sets of parasol-covered dining tables"], ["Opening Hours", "To Be Announced"], ["Admission", "To Be Announced"]],
+    sections: [
+      { type: "text", h: "Discover the Location", p: ["Qilou Old Street (骑楼老街) is one of Haikou's best-known historic districts. Its covered arcade buildings, built largely by overseas Chinese communities during the 1920s and 1930s, stretch for more than 1 km. Shaded walkways on the ground floor provide shelter from sun and rain, while the upper floors feature distinctive Western-inspired architectural details. The district is a popular stop for visitors exploring Hainan's cultural heritage.", "The festival takes place at North Gate Square, at the northern end of the historic street. The venue is set against the large LED-fronted building of Xianan Yang · Qilou Food Market (夏南洋·骑楼烟火食集), a Nanyang-style food destination that opened during China's National Day holiday in 2025. In the evening, visitors can enjoy Korean food and live performances beneath warm lantern lighting."] },
+      { type: "layout", h: "Venue Layout", img: "img-venue-a.jpg", items: [["Entrance Gate", "Southern entrance from Changdi Road (长堤路), featuring an 8m-wide Korean hanok-style gate marked 'Korean Cultural Festival'"], ["Retail Booths", "9 booths measuring 4×4×3m — booths 1–4 on the north side and booths 5–9 on the west side"], ["Dining Area", "16 sets of parasol-covered tables in the center of the square"], ["Cultural Stage", "A 7×8.5m truss stage on the east side, 5m high and facing west"]], note: "Dimensions are based on the organizer's venue drawings. Some details may change according to on-site conditions." },
+      { type: "booths", h: "Booths & Menus", venue: "A" },
+      { type: "list", h: "Suggested Festival Experience", items: ["Arrive around sunset, stroll through the covered arcades of Qilou Old Street (骑楼老街), and head to North Gate Square", "Pick up Korean fried chicken or a cup of tteokbokki and enjoy a cultural performance from the dining area", "Pay at participating booths using WeChat Pay or Alipay QR codes", "Take a souvenir photo in front of the LED display at Xianan Yang (夏南洋)"] },
+      { type: "facts", h: "Getting Here", rows: [["By Air", "Approximately 30–40 minutes by car from Haikou Meilan International Airport (海口美兰国际机场)"], ["Within Haikou", "Take a taxi or DiDi and search for '骑楼老街' or '夏南洋骑楼烟火食集'"], ["Weather", "Average December temperatures: 17–24°C · Bring a light jacket for the evening"], ["Payment", "WeChat Pay and Alipay (availability varies by booth)"]], maps: 0 },
+      { type: "gallery", h: "Venue Preview", imgs: ["img-food.jpg", "img-pg-stage.jpg", "img-visit-a.jpg", "img-hero.jpg"] }
+    ],
+    related: ["wanning", "kfood", "stage", "guide"]
+  },
+
+  wanning: {
+    group: "visitor", kicker: "VENUE 02 · WANNING", title: "Wanning · Shenzhou Peninsula (神州半岛) Beachfront",
+    lead: "Set beside the South China Sea, Shenzhou Peninsula (神州半岛) provides a coastal setting for 26 days of Korean food, culture, and entertainment across the New Year, with 24 booths and a main performance stage.",
+    hero: "img-city-b.jpg", walk: "B",
+    facts: [["Dates", "2026.12.30 – 2027.01.24 (26 days)"], ["Location", "Shenzhou Peninsula (神州半岛) beachfront square, Wanning (万宁市) · Exact location to be confirmed"], ["Scale", "24 retail booths · 1 main stage · Parasol-covered dining area"], ["Opening Hours", "To Be Announced"], ["Admission", "To Be Announced"]],
+    sections: [
+      { type: "text", h: "Discover the Location", p: ["Shenzhou Peninsula (神州半岛), located in Wanning on Hainan's southeastern coast, is a resort destination known for sandy beaches, surfing spots, hotels, and golf courses. Winter temperatures often hover around 20°C, making it a popular destination for year-end and New Year holidays.", "The festival will be set up in a square beside the beach. During the day, visitors can enjoy Korean food with views of the sea. After sunset, the main stage will host K-POP dance battles and other performances."] },
+      { type: "layout", h: "Venue Layout (Concept)", img: "img-venue-b.jpg", items: [["Entrance", "Access from the southern approach road"], ["Retail Booths", "10 on the north side · 7 on the west side · 7 on the east side, totaling 24 booths"], ["Dining Area", "Parasol-covered tables in the central area"], ["Main Stage", "Truss stage on the east side for dance battles and performances"]], note: "This is a preliminary layout concept pending the organizer's official venue plan. It will be updated once confirmed." },
+      { type: "booths", h: "Booths & Menus", venue: "B" },
+      { type: "list", h: "Suggested Festival Experience", items: ["Spend the afternoon walking along the beach, then stop for Korean desserts and drinks", "Cheer for local dance crews at the evening K-POP dance battle on the main stage", "Visit the Korean Play Zone and try a New Year fortune reading at the Four Pillars of Destiny kiosk", "Wear a traditional Korean hanbok and take photos against the coastal sunset"] },
+      { type: "facts", h: "Getting Here", rows: [["By Air", "Approximately 1.5–2 hours by car from Haikou Meilan International Airport (海口美兰国际机场) or Sanya Phoenix International Airport (三亚凤凰国际机场)"], ["By Train", "Take a high-speed train to Wanning Station (万宁站), then continue by car"], ["Weather", "Average December–January temperatures: 19–26°C · Sun protection is recommended"], ["Payment", "WeChat Pay and Alipay (availability varies by booth)"]], maps: 1 },
+      { type: "gallery", h: "Venue Preview", imgs: ["img-visit-b.jpg", "img-pg-battle.jpg", "img-kplay.jpg", "img-hanbok.jpg"] }
+    ],
+    related: ["haikou", "battle", "playzone", "guide"]
+  },
+
+  kfood: {
+    group: "visitor", kicker: "K-FOOD", title: "K-Food · Freshly Prepared Korean Favorites",
+    lead: "Korean chefs will prepare dishes right at their booths, from crispy fried chicken and spicy tteokbokki to noodles, skewers, desserts, traditional drinks, and Korean soju.",
+    hero: "img-food.jpg",
+    facts: [["Booths", "Haikou booths 1–8 + Wanning food and beverage booths"], ["Price Range", "¥10 ~ ¥80 (examples)"], ["Payment", "WeChat Pay · Alipay"], ["Menus", "Available in Korean and Chinese"]],
+    sections: [
+      { type: "text", h: "What's on the Menu?", p: ["All K-Food cooking booths are designed for on-site preparation and equipped with 6kW electrical capacity, water supply and drainage, and refrigeration. Dishes are prepared after ordering and served fresh and warm.", "Featured foods include original fried chicken, sweet-and-spicy chicken, soy-garlic chicken, dakgangjeong (Korean glazed chicken bites), tteokbokki (spicy rice cakes), fish cakes, gimbap, jajangmyeon (black bean noodles), naengmyeon (cold noodles), and bulgogi skewers. Drinks include Korean banana milk, sikhye (sweet rice punch), and yuja ade, alongside draft beer and Korean soju."] },
+      { type: "booths", h: "Menus & Prices by Booth", zone: "kfood" },
+      { type: "booths", h: "Drinks & Alcohol", zone: "drink" },
+      { type: "list", h: "Good to Know", items: ["Alcohol is available only to customers aged 18 or older", "Please ask booth staff about ingredients and potential allergens", "Menus and prices may change once participating vendors are confirmed"] },
+      { type: "gallery", h: "Booth Preview", imgs: ["img-pk-kitchen.jpg", "img-sup-pay.jpg", "img-pk-std.jpg"] }
+    ],
+    related: ["haikou", "kbeauty", "pk-kitchen", "guide"]
+  },
+
+  kbeauty: {
+    group: "visitor", kicker: "K-BEAUTY", title: "K-Beauty · Try Korean Beauty Products Before You Buy",
+    lead: "Explore Korean skincare, makeup, sheet masks, hair and body care, and beauty devices. Test products in person, ask questions, and receive guidance from Korean beauty staff before choosing what suits you.",
+    hero: "img-kbeauty.jpg",
+    facts: [["Booths", "Wanning K-Beauty booths + Shared Showcase Pavilion"], ["Experience", "Product testers · Skin-type consultations"], ["Payment", "WeChat Pay · Alipay"], ["Languages", "Korean and Chinese assistance"]],
+    sections: [
+      { type: "text", h: "How Does It Work?", p: ["Each booth will have product testers and mirrors. Try products on the back of your hand and tell the staff about your skin type. They can help you compare products and choose suitable options.", "The shared showcase pavilion brings together products from several smaller Korean beauty brands. Each brand has a dedicated 1.2m display area, allowing visitors to compare products in one place. Local staff will provide assistance in Chinese."] },
+      { type: "booths", h: "Products & Prices by Booth", zone: "beauty" },
+      { type: "list", h: "Recommended For", items: ["Visitors interested in emerging Korean beauty brands that have not yet entered the Chinese market", "Anyone looking for skincare guidance based on their skin type", "Shoppers searching for sheet mask or hand cream gift sets"] },
+      { type: "gallery", h: "Booth Preview", imgs: ["img-pk-showcase.jpg", "img-sup-promo.jpg", "img-beauty.jpg"] }
+    ],
+    related: ["hanbok", "pk-showcase", "kfood", "wanning"]
+  },
+
+  battle: {
+    group: "visitor", kicker: "PROGRAM · MAIN", title: "K-POP Dance Battle",
+    lead: "Local Chinese dance crews will compete with K-POP cover performances. Weekly preliminary rounds are planned for the main stage in Wanning, followed by a final during the festival's closing week.",
+    hero: "img-pg-battle.jpg",
+    facts: [["Location", "Main stage, Shenzhou Peninsula (神州半岛), Wanning"], ["Schedule", "Preliminaries begin 12.30 · Weekly rounds · Finals in the last week of January (planned)"], ["Eligibility", "China-based K-POP cover dance crews"], ["Prizes", "To Be Announced"], ["Admission", "Free on-site viewing (planned)"]],
+    sections: [
+      { type: "steps", h: "Competition Format (Planned)", items: [["Registration", "Submit a team introduction and rehearsal video online"], ["Weekly Preliminaries", "Teams perform on the main stage on a designated evening each week"], ["Judging", "Judges' scores combined with audience response"], ["Finals", "Top teams from the weekly preliminaries advance to the closing-week final"]] },
+      { type: "list", h: "What to Watch For", items: ["Head-to-head 1:1 rounds where two teams take turns performing to the same song", "Audience participation with smartphone light displays in front of the stage", "A championship award ceremony featuring sponsor naming opportunities"] },
+      { type: "text", h: "Dance Crew Registration", p: ["Application instructions, detailed competition rules, and prize information will be announced on this page and through official channels once confirmed by the organizer."] },
+      { type: "gallery", h: "Event Preview", imgs: ["img-kculture.jpg", "img-dance.jpg", "img-sponsor.jpg"] }
+    ],
+    related: ["wanning", "stage", "sponsor", "playzone"]
+  },
+
+  stage: {
+    group: "visitor", kicker: "PROGRAM", title: "Cultural Performance Stage",
+    lead: "Experience Korean traditional performances, including fan dance and samulnori percussion, alongside contemporary music, brand showcases, and prize activities. Daily stage programming is planned throughout the festival.",
+    hero: "img-pg-stage.jpg",
+    facts: [["Locations", "Haikou cultural stage · Wanning main stage"], ["Stage", "Haikou 7×8.5m truss stage (5m high)"], ["Performance Schedule", "To Be Announced"], ["Admission", "Free on-site viewing (planned)"]],
+    sections: [
+      { type: "list", h: "Planned Performances", items: ["Traditional Korean performances — fan dance, samulnori percussion, and hanbok fashion shows", "Contemporary performances — K-POP cover dances and live busking", "Brand showcases — product presentations and demonstrations by exhibitors", "Prize activities — on-site draws and social media check-in events"] },
+      { type: "text", h: "Opportunities for Exhibitors", p: ["Sponsorship packages include brand logo exposure on the stage LED screen and dedicated showcase time. Standard exhibitors may also request a showcase by entering their requirements in the application form's notes field. Scheduling will be coordinated based on availability."] },
+      { type: "gallery", h: "Stage Preview", imgs: ["img-stage.jpg", "img-sponsor.jpg", "img-kculture.jpg"] }
+    ],
+    related: ["battle", "haikou", "sponsor", "hanbok"]
+  },
+
+  photozone: {
+    group: "visitor", kicker: "PROGRAM", title: "K-Photo Experience Zone",
+    lead: "Discover popular Korean photo experiences, including a KC-certified mirror photo booth, an AI retro portrait studio, and instant K-POP-style photo cards.",
+    hero: "img-pg-photo.jpg",
+    facts: [["Location", "Wanning experience booths (including B22)"], ["Duration", "Approximately 3–5 minutes per session"], ["Price", "From ¥30 (example)"], ["Payment", "WeChat Pay · Alipay"]],
+    sections: [
+      { type: "list", h: "What Can You Try?", items: ["Mirror Photo Booth — take and print full-body photos with a tap on an interactive mirror", "AI Retro Photo Studio — transform your portrait into a vintage Korean photo style", "K-POP Photo Cards — turn your photo into an idol-style collectible card, printed on the spot", "Four-Cut Photo Booth — capture four fun moments with friends in a single photo strip"] },
+      { type: "booths", h: "Experience Booths & Prices", zone: "exp" },
+      { type: "gallery", h: "Experience Preview", imgs: ["img-photobooth.jpg", "img-kculture.jpg"] }
+    ],
+    related: ["hanbok", "playzone", "wanning", "kbeauty"]
+  },
+
+  hanbok: {
+    group: "visitor", kicker: "PROGRAM", title: "Hanbok & K-Beauty Experiences",
+    lead: "Dress in traditional Korean hanbok for memorable photos, discover your personal color palette, and learn simple Korean makeup techniques at interactive experience booths.",
+    hero: "img-hanbok.jpg",
+    facts: [["Location", "Wanning experience booths (B23·B24)"], ["Hanbok", "Costume rental with photography inside the event venue"], ["Personal Color", "One-on-one color draping consultation"], ["Reservations", "On-site registration (planned)"]],
+    sections: [
+      { type: "steps", h: "Hanbok Experience: Step by Step", items: [["Choose Your Outfit", "Select a pastel-colored jeogori (jacket), skirt, and traditional norigae accessory"], ["Get Dressed", "Korean staff will assist you with wearing the hanbok"], ["Take Photos", "Enjoy taking pictures at festival photo spots and along the beach"], ["Return", "Return the rented outfit to the booth within the designated time"]] },
+      { type: "text", h: "Personal Color & Makeup", p: ["During a personal color consultation, different colored fabrics are held near your face to help identify flattering tones within the four seasonal palettes: spring, summer, autumn, and winter. A short K-Beauty makeup class will also demonstrate products and techniques based on your color analysis results."] },
+      { type: "booths", h: "Experience Booths & Prices", zone: "exp" },
+      { type: "gallery", h: "Experience Preview", imgs: ["img-beauty.jpg", "img-kbeauty.jpg"] }
+    ],
+    related: ["photozone", "kbeauty", "playzone", "wanning"]
+  },
+
+  playzone: {
+    group: "visitor", kicker: "K-PLAY", title: "Korean Play Zone · Traditional Games",
+    lead: "Explore your yearly fortune and relationship compatibility at an AI-powered Four Pillars of Destiny kiosk, then try traditional Korean games such as Yut nori, Tuho (arrow-throwing), Jegi-chagi, and Ddakji for a chance to win small prizes.",
+    hero: "img-kplay.jpg",
+    facts: [["Location", "Wanning B20 fortune-telling kiosk · B21 traditional games"], ["Price", "¥10 ~ ¥30 (examples)"], ["For", "Children and adults"], ["Prizes", "Small gifts for completing game challenges (planned)"]],
+    sections: [
+      { type: "text", h: "Four Pillars of Destiny Kiosk", p: ["Enter your date and time of birth to receive a yearly fortune reading based on Korean traditional Four Pillars of Destiny (Saju). The kiosk also prints your fortune on paper designed to resemble traditional Korean hanji. Couples and friends can explore relationship compatibility, receive matching cards, or take home a red New Year wish card as a keepsake.", "Both the touchscreen interface and printed results support Chinese and Korean."] },
+      { type: "list", h: "Traditional Korean Games", items: ["Yut nori — a traditional Korean Lunar New Year board game played by tossing 4 wooden sticks and moving pieces according to the result", "Tuho (arrow-throwing) — a traditional court game where players throw arrows into a jar", "Jegi-chagi — keep a traditional Korean shuttlecock in the air by repeatedly kicking it without letting it touch the ground", "Ddakji — a game where players strike a folded paper tile with another tile, aiming to flip it over"] },
+      { type: "booths", h: "Experience Booths & Prices", zone: "play" },
+      { type: "gallery", h: "Experience Preview", imgs: ["img-pg-play.jpg", "img-kplay.jpg"] }
+    ],
+    related: ["wanning", "photozone", "hanbok", "battle"]
+  },
+
+  guide: {
+    group: "visitor", kicker: "VISITOR GUIDE", title: "Visitor Guide",
+    lead: "Two cities, 32 days of festivities. Everything you need for an easy visit, including transportation, payment options, weather, and language assistance, is gathered in one place.",
+    hero: "img-visit-a.jpg",
+    facts: [["Haikou", "2026.12.24 – 12.29 · North Gate Square, Qilou Old Street (骑楼老街)"], ["Wanning", "2026.12.30 – 2027.01.24 · Shenzhou Peninsula (神州半岛) beachfront square"], ["Opening Hours", "To Be Announced"], ["Admission", "To Be Announced"]],
+    sections: [
+      { type: "facts", h: "Transportation", rows: [["Haikou Venue", "Approximately 30–40 minutes by car from Haikou Meilan International Airport (海口美兰国际机场) · Taxis and DiDi available"], ["Wanning Venue", "Approximately 1.5–2 hours by car from Meilan or Sanya Phoenix Airport · High-speed rail to Wanning Station (万宁站)"], ["Between Venues", "Approximately 2 hours by car via expressway"]] },
+      { type: "facts", h: "Payment", rows: [["On-site Payment", "WeChat Pay and Alipay (availability varies by booth)"], ["International Cards", "International bank cards can be linked to Alipay for payments"], ["Cash", "Accepted at selected booths only"]] },
+      { type: "facts", h: "Weather & What to Bring", rows: [["Haikou", "Average December temperatures: 17–24°C · Bring a light jacket for the evening"], ["Wanning", "Average December–January temperatures: 19–26°C · Sunscreen and a hat recommended"], ["Essentials", "Phone charger, mobile payment app, and comfortable walking shoes"]] },
+      { type: "list", h: "Languages & Assistance", items: ["Venue signs and menus will be available in both Korean and Chinese", "Shared on-site interpretation assistance will be available", "This website supports 4 languages: Chinese, Korean, English, and Japanese"] },
+      { type: "faq", h: "Frequently Asked Questions", src: "faq_v" }
+    ],
+    related: ["haikou", "wanning", "kfood", "playzone"]
+  },
+
+  exhibitor: {
+    group: "exhibitor", kicker: "EXHIBITOR GUIDE", title: "Exhibitor Guide",
+    lead: "From preparing your products in Korea to selling them in Hainan, this guide covers the full process: application, logistics, settlement, and opportunities for ongoing retail and export partnerships.",
+    hero: "img-b2b.jpg",
+    facts: [["Application Period", "2026.11.16 – 12.05 (may close early when booths are filled)"], ["Available Spaces", "9 booths in Haikou · 24 booths in Wanning · Shared showcase pavilion"], ["Participation Fee", "From ₩800,000 (illustrative reference price)"], ["Settlement", "Sales settled in Korean won within 14 days after the event ends"]],
+    sections: [
+      { type: "steps", h: "How to Participate", items: [["Application", "Complete the 4-step application form on the website and submit it to the event coordinator"], ["Document Review", "Receive the review result within 2 business days"], ["Deposit", "Pay 50% of the participation fee within 3 days of approval"], ["Balance & Shipping", "Pay the remaining 50% by 12.10 and ship your products"], ["Customs & Food Compliance", "Temporary customs clearance for event goods · Local importer matching for food products"], ["Travel & Setup", "Depart on 12.22 and set up the booth at the venue"], ["Event Operations", "Sell products on-site and accept WeChat Pay or Alipay"], ["Settlement & Follow-up", "Complete settlement within 14 days · Discuss permanent retail placement and export opportunities"]] },
+      { type: "support", h: "Organizer Support" },
+      { type: "timeline", h: "Key Dates & Milestones" },
+      { type: "list", h: "Refund Policy", src: "terms" },
+      { type: "faq", h: "Exhibitor FAQs", src: "faq" }
+    ],
+    related: ["pk-std", "pk-kitchen", "pk-showcase", "sponsor"]
+  },
+
+  "pk-std": {
+    group: "exhibitor", kicker: "PACKAGE · STANDARD", title: "Standard Booth Package", pk: "std",
+    lead: "Includes one retail booth and one dispatched staff member. Designed for businesses selling products that do not require on-site cooking, such as packaged foods, cosmetics, and merchandise.",
+    hero: "img-pk-std.jpg",
+    sections: [
+      { type: "pkgitems", h: "What's Included" },
+      { type: "list", h: "Ideal for", items: ["Packaged food, beverage, and sauce brands", "Cosmetics and beauty device brands", "K-POP merchandise and character product brands", "Businesses seeking direct feedback from Chinese consumers"] },
+      { type: "table", h: "Estimated Cost Example", head: ["Item", "Amount"], rows: [["Standard Package (1 venue)", "₩1,500,000"], ["Add full participation at both venues", "+₩1,000,000"], ["1 additional staff member", "+₩690,000"], ["Logistics & customs handling (within 1CBM)", "+₩300,000 + actual shipping costs"]], note: "These are illustrative reference prices and may change after confirmation by the organizer." },
+      { type: "addons", h: "Optional Add-ons" },
+      { type: "list", h: "Costs Not Included", items: ["Actual product shipping expenses", "On-site sales settlement commission (8% of sales)", "Personal expenses"], }
+    ],
+    related: ["pk-kitchen", "pk-showcase", "sponsor", "exhibitor"]
+  },
+
+  "pk-kitchen": {
+    group: "exhibitor", kicker: "PACKAGE · KITCHEN", title: "Cooking Booth Package", pk: "kitchen",
+    lead: "Includes an equipped cooking booth and two dispatched staff members. A popular option for food businesses preparing Korean fried chicken, tteokbokki, and other freshly cooked dishes on-site.",
+    hero: "img-pk-kitchen.jpg",
+    sections: [
+      { type: "pkgitems", h: "What's Included" },
+      { type: "facts", h: "Kitchen Facilities", rows: [["Electricity", "6kW"], ["Water Supply & Drainage", "Included"], ["Refrigerator", "1 unit"], ["Cooking Permits", "Assistance with local food business and fire safety filings"], ["Ingredients", "Introductions to local ingredient suppliers"]] },
+      { type: "table", h: "Estimated Cost Example", head: ["Item", "Amount"], rows: [["Cooking Package (1 venue)", "₩2,800,000"], ["Add full participation at both venues", "+₩1,000,000"], ["1 additional staff member", "+₩690,000"]], note: "These are illustrative reference prices and may change after confirmation by the organizer." },
+      { type: "addons", h: "Optional Add-ons" },
+      { type: "list", h: "Important Information", items: ["Ingredients brought from Korea must be checked in advance for customs eligibility", "Local sourcing is recommended for meat, dairy products, and similar ingredients", "Menus will be prepared in both Korean and Chinese"] }
+    ],
+    related: ["kfood", "pk-std", "exhibitor", "haikou"]
+  },
+
+  "pk-showcase": {
+    group: "exhibitor", kicker: "PACKAGE · SHOWCASE", title: "Shared Pavilion Consignment Package", pk: "showcase",
+    lead: "Participate without sending staff overseas. Simply ship your products, and local staff will display and sell them in the shared pavilion while providing daily sales reports.",
+    hero: "img-pk-showcase.jpg",
+    sections: [
+      { type: "pkgitems", h: "What's Included" },
+      { type: "steps", h: "How It Works", items: [["Send Samples", "Ship up to 30kg of products to the designated warehouse"], ["Customs Clearance", "The organizer handles sample customs clearance"], ["Display & Sales", "Products are displayed in a 1.2m section of the shared pavilion and sold by local staff"], ["Daily Reports", "Receive daily sales reports and settlement details"], ["Buyer Meetings", "Product information and business materials are shared with Chinese buyers"]] },
+      { type: "table", h: "Estimated Cost Example", head: ["Item", "Amount"], rows: [["Shared Pavilion Consignment (full event period)", "₩800,000"], ["Logistics & customs handling", "+₩300,000 + actual shipping costs"]], note: "These are illustrative reference prices and may change after confirmation by the organizer." }
+    ],
+    related: ["kbeauty", "pk-std", "exhibitor", "sponsor"]
+  },
+
+  sponsor: {
+    group: "exhibitor", kicker: "PACKAGE · SPONSOR", title: "Brand Sponsorship",
+    pk: "sponsor",
+    lead: "Put your brand in prominent positions throughout the 32-day festival, from the main stage LED screen and entrance gate to naming opportunities for the K-POP dance battle awards.",
+    hero: "img-sponsor.jpg",
+    sections: [
+      { type: "pkgitems", h: "What's Included" },
+      { type: "list", h: "Brand Exposure Opportunities", items: ["Main stage LED screen and vertical banners beside the stage", "Korean hanok-style entrance gate", "Naming rights for the K-POP dance battle awards ceremony", "3 promotional content placements on Xiaohongshu (小红书) and Douyin (抖音)", "Dedicated sponsor section on the official website"] },
+      { type: "text", h: "Tailored Sponsorship Proposals", p: ["Brand placement, exposure period, and award event arrangements can be customized according to your objectives. Select the sponsorship option in the application form and describe your requirements in the notes field."] }
+    ],
+    related: ["battle", "stage", "pk-kitchen", "exhibitor"]
+  }
+};
