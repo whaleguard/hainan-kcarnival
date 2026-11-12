@@ -6,7 +6,7 @@
   const fmt = n => n.toLocaleString("en-US");
   const PK_ORDER = ["std", "kitchen", "showcase", "sponsor"];
   const ST_CLASS = { open: "s-open", res: "s-res", conf: "s-conf" };
-  const ST_COLOR = { open: "#34BFAC", res: "#F2B84B", conf: "#8C97A0" };
+  const ST_COLOR = { open: "#2FA57C", res: "#E3A02F", conf: "#8E969D" };
   const IMG = { A: "img-venue-a.jpg", B: "img-venue-b.jpg", prog: ["img-dance.jpg", "img-stage.jpg", "img-photobooth.jpg", "img-beauty.jpg"] };
 
   const state = { lang: "ko", venue: "A", sel: null };
@@ -54,7 +54,7 @@
           <p>${esc(v.desc)}</p>
           <div class="chips">${v.tags.map(x => `<span class="chip">${esc(x)}</span>`).join("")}</div>
           <dl class="facts">${v.facts.map(f => `<dt>${esc(f[0])}</dt><dd>${esc(f[1])}</dd>`).join("")}</dl>
-          <div class="btns"><a class="btn btn-ghost" href="#map" data-goto="${k}" style="padding:10px 18px;font-size:14px">${esc(L.cta_map)}</a></div>
+          <div><a class="link-arrow" href="#map" data-goto="${k}"><span>${esc(L.cta_map)}</span><i aria-hidden="true"></i></a></div>
         </div></article>`;
     }).join("");
 
@@ -72,7 +72,7 @@
         <span class="for">${esc(p.for)}</span>
         <div class="pr"><b>${price}</b><span>${esc(p.unit)}</span></div>
         <ul>${p.items.map(i => `<li>${esc(i)}</li>`).join("")}</ul>
-        <a class="btn ${k === "kitchen" ? "btn-red" : "btn-ghost"}" href="#apply" data-pick="${k}">${esc(L.pk_pick)}</a>
+        <a class="btn ${k === "kitchen" ? "btn-light" : "btn-line"}" href="#apply" data-pick="${k}">${esc(L.pk_pick)}</a>
       </article>`;
     }).join("");
     $("#addons").innerHTML = L.addons.map(a => `<tr><td>${esc(a[0])}</td><td>${esc(a[1])}</td></tr>`).join("");
@@ -115,7 +115,7 @@
         <dt>${esc(L.card.pkg)}</dt><dd>${esc(p.name)} · ${esc(p.for)}</dd>
       </dl>
       <div><div style="font-size:12px;color:var(--muted)">${esc(L.card.price)}</div><div class="price">${fmt(PKG[b.pkg].price)} <span style="font-size:14px;color:var(--muted)">${esc(p.unit)}</span></div></div>
-      ${canApply ? `<a class="btn btn-red" href="#apply" data-apply-booth="${b.id}">${esc(L.card.apply)}</a>` : `<button type="button" class="btn btn-ghost" data-next-open>${esc(L.card.other)}</button>`}
+      ${canApply ? `<a class="btn btn-dark" href="#apply" data-apply-booth="${b.id}">${esc(L.card.apply)}</a>` : `<button type="button" class="btn btn-line" data-next-open>${esc(L.card.other)}</button>`}
     </div>`;
   }
 
@@ -281,9 +281,22 @@
   $("#form").addEventListener("submit", submit);
   $("#btn-copy").addEventListener("click", copyDone);
   $("#btn-edit").addEventListener("click", () => { $("#done").hidden = true; $("#f-company").focus(); });
-  $(".hero-img img").addEventListener("load", function () { this.classList.add("ok"); });
-  $(".hero-img img").addEventListener("error", function () { this.remove(); });
-  if ($(".hero-img img") && $(".hero-img img").complete && $(".hero-img img").naturalWidth) $(".hero-img img").classList.add("ok");
+  /* hero film + festival soundtrack (sound starts only on tap: browsers block autoplay audio) */
+  const vid = $("#hero-video"), bgm = $("#bgm"), snd = $("#sound");
+  if (vid) {
+    const on = () => vid.classList.add("on");
+    vid.addEventListener("playing", on);
+    if (vid.readyState >= 3) on();
+    vid.play && vid.play().catch(() => {});
+  }
+  if (snd && bgm) {
+    bgm.volume = 0.55;
+    snd.addEventListener("click", () => {
+      const playing = snd.getAttribute("aria-pressed") === "true";
+      if (playing) { bgm.pause(); snd.setAttribute("aria-pressed", "false"); }
+      else { bgm.play().then(() => snd.setAttribute("aria-pressed", "true")).catch(() => {}); }
+    });
+  }
 
   /* public API for the 3D module */
   window.App = {

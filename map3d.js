@@ -1,5 +1,10 @@
 import * as THREE from "three";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
+import { EffectComposer } from "three/addons/postprocessing/EffectComposer.js";
+import { RenderPass } from "three/addons/postprocessing/RenderPass.js";
+import { UnrealBloomPass } from "three/addons/postprocessing/UnrealBloomPass.js";
+import { OutputPass } from "three/addons/postprocessing/OutputPass.js";
+import { RoomEnvironment } from "three/addons/environments/RoomEnvironment.js";
 
 const stage = document.getElementById("stage3d");
 const loadingEl = document.getElementById("map-loading");
@@ -19,12 +24,33 @@ renderer.shadowMap.enabled = true;
 renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 renderer.outputColorSpace = THREE.SRGBColorSpace;
 renderer.toneMapping = THREE.ACESFilmicToneMapping;
-renderer.toneMappingExposure = 1.05;
+renderer.toneMappingExposure = 0.92;
 stage.prepend(renderer.domElement);
 
 const scene = new THREE.Scene();
-scene.background = new THREE.Color(0x0E2633);
-scene.fog = new THREE.Fog(0x0E2633, 90, 220);
+scene.background = new THREE.Color(0x1B2236);
+scene.fog = new THREE.Fog(0x2A2C45, 120, 330);
+{ const pm = new THREE.PMREMGenerator(renderer); scene.environment = pm.fromScene(new RoomEnvironment(), 0.04).texture; scene.environmentIntensity = 0.12; }
+
+/* ---------- photo textures made with GPT (fallback colours until loaded) ---------- */
+const texLoader = new THREE.TextureLoader();
+function loadTex(url, cb) {
+  texLoader.load(url, t => { t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = renderer.capabilities.getMaxAnisotropy(); cb(t); }, undefined, () => {});
+}
+function loadImg(url, cb) { const im = new Image(); im.crossOrigin = "anonymous"; im.onload = () => cb(im); im.src = url; }
+const ROOF_MAT = new THREE.MeshStandardMaterial({ color: 0x2A3038, roughness: 0.7, metalness: 0.05 });
+const BOOTH_FRONT_MAT = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.8, transparent: true, opacity: 0, emissive: 0xffffff, emissiveIntensity: 0.18 });
+loadTex("tex-roof.jpg", t => { t.wrapS = t.wrapT = THREE.RepeatWrapping; t.repeat.set(3, 3); ROOF_MAT.map = t; ROOF_MAT.color.set(0xb8b8b8); ROOF_MAT.needsUpdate = true; });
+loadTex("tex-booth.jpg", t => { t.offset.set(0.03, 0.03); t.repeat.set(0.94, 0.94); BOOTH_FRONT_MAT.map = t; BOOTH_FRONT_MAT.emissiveMap = t; BOOTH_FRONT_MAT.opacity = 1; BOOTH_FRONT_MAT.transparent = false; BOOTH_FRONT_MAT.needsUpdate = true; });
+function backdrop(url, parent, radius, repeats) {
+  loadTex(url, t => {
+    t.wrapS = THREE.MirroredRepeatWrapping; t.repeat.set(repeats, 1);
+    const H = (2 * Math.PI * radius) / repeats / (t.image.width / t.image.height);
+    const m = new THREE.Mesh(new THREE.CylinderGeometry(radius, radius, H, 96, 1, true), new THREE.MeshBasicMaterial({ map: t, side: THREE.BackSide, fog: false }));
+    m.position.y = H / 2 - H * 0.25 - 2; parent.add(m);
+    if (parent.userData.onBackdrop) parent.userData.onBackdrop();
+  });
+}
 const camera = new THREE.PerspectiveCamera(42, 1, 0.5, 600);
 const controls = new OrbitControls(camera, renderer.domElement);
 controls.enableDamping = true;
@@ -228,7 +254,8 @@ function makeBooth(b, parent, x, z, rotY) {
   for (let i = 0; i < 5; i++) box(0.35, 0.3 + (i % 2) * 0.15, 0.35, M([0xE2483D, 0xF2B84B, 0x34BFAC, 0xF4EFE6, 0x2E64A8][i]), -1.3 + i * 0.65, 1.15, 1.5, g);
   // eave + roof
   box(4.9, 0.12, 4.9, dark, 0, 3.0, 0, g);
-  const roof = hipRoof(2.55, 2.55, 1.35, tile); roof.position.y = 3.72; g.add(roof);
+  const roof = hipRoof(2.55, 2.55, 1.35, ROOF_MAT); roof.position.y = 3.72; g.add(roof);
+  const front = new THREE.Mesh(new THREE.PlaneGeometry(3.96, 2.92), BOOTH_FRONT_MAT); front.position.set(0, 1.5, 2.0); g.add(front);
   box(1.6, 0.14, 0.18, dark, 0, 4.42, 0, g);
   // status strip on eave front
   const strip = new THREE.Mesh(new THREE.BoxGeometry(4.9, 0.14, 0.06), new THREE.MeshStandardMaterial({ color: ST_COLOR[b.st], emissive: ST_COLOR[b.st], emissiveIntensity: 0.9 }));
@@ -300,11 +327,103 @@ function qilouRow(parent, x0, x1, z) {
   }
 }
 
+
+/* 夏南洋 front elevation photo (GPT T1): white sky keyed out, black LED rectangle detected and filled with the festival film */
+let ledVideo = null;
+function festivalVideoTexture() {
+  if (!ledVideo) {
+    ledVideo = document.createElement("video");
+    Object.assign(ledVideo, { src: "hero.mp4", muted: true, loop: true, playsInline: true, crossOrigin: "anonymous" });
+    ledVideo.setAttribute("playsinline", ""); ledVideo.play().catch(() => {});
+  }
+  const t = new THREE.VideoTexture(ledVideo); t.colorSpace = THREE.SRGBColorSpace; return t;
+}
+function photoFacade(g, hall) {
+  loadImg("tex-facade.jpg", im => {
+    const W = im.naturalWidth, H = im.naturalHeight;
+    const c = document.createElement("canvas"); c.width = W; c.height = H;
+    const x = c.getContext("2d"); x.drawImage(im, 0, 0);
+    const d = x.getImageData(0, 0, W, H), p = d.data;
+    let minX = W, minY = H, maxX = 0, maxY = 0, top = H;
+    for (let y = 0; y < H; y++) for (let i = 0; i < W; i++) {
+      const k = (y * W + i) * 4, r = p[k], gg = p[k + 1], b = p[k + 2];
+      if (r > 232 && gg > 232 && b > 232) { p[k + 3] = 0; continue; }
+      if (y < top) top = y;
+      if (r < 14 && gg < 14 && b < 14 && i > W * 0.12 && i < W * 0.88 && y > H * 0.1 && y < H * 0.8) {
+        if (i < minX) minX = i; if (i > maxX) maxX = i; if (y < minY) minY = y; if (y > maxY) maxY = y;
+      }
+    }
+    x.putImageData(d, 0, 0);
+    const tex = texOf(c);
+    const PW = 46, PH = PW * H / W;
+    const mat = new THREE.MeshStandardMaterial({ map: tex, transparent: true, alphaTest: 0.5, roughness: 0.85, emissive: 0xffffff, emissiveMap: tex, emissiveIntensity: 0.35 });
+    const face = new THREE.Mesh(new THREE.PlaneGeometry(PW, PH), mat);
+    const fg = new THREE.Group(); fg.position.set(0, 0, -24); g.add(fg);
+    face.position.set(0, PH / 2, 4.65); fg.add(face);
+    // massing behind the photo so the building has depth from oblique views
+    const bodyTop = PH * (1 - (top / H)) * 0.68;
+    box(PW - 0.2, bodyTop, 10, M(0xCFC6B4), 0, bodyTop / 2, -0.4, fg);
+    const gable = new THREE.Shape(); gable.moveTo(-PW / 2, 0); gable.lineTo(0, PH * (1 - top / H) - bodyTop); gable.lineTo(PW / 2, 0); gable.lineTo(-PW / 2, 0);
+    const gGeo = new THREE.ExtrudeGeometry(gable, { depth: 10, bevelEnabled: false }); gGeo.translate(0, 0, -5.4);
+    const gm = new THREE.Mesh(gGeo, M(0x3B3F44, { roughness: 0.6 })); gm.position.y = bodyTop; gm.castShadow = true; fg.add(gm);
+    if (maxX > minX && maxY > minY) {
+      const lw = (maxX - minX) / W * PW, lh = (maxY - minY) / H * PH;
+      const lx = ((minX + maxX) / 2 / W - 0.5) * PW, ly = PH - (minY + maxY) / 2 / H * PH;
+      const led = new THREE.Mesh(new THREE.PlaneGeometry(lw, lh), new THREE.MeshBasicMaterial({ map: festivalVideoTexture(), toneMapped: false }));
+      led.position.set(lx, ly, 4.7); fg.add(led);
+    }
+    hall.visible = false;
+  });
+}
+
+/* tourists from the GPT chroma-key sheet (T8): keyed to alpha, cut into 10 figures, scattered as billboards */
+function loadPeople(cb) {
+  loadImg("people.png", im => {
+    const W = im.naturalWidth, H = im.naturalHeight;
+    const c = document.createElement("canvas"); c.width = W; c.height = H;
+    const x = c.getContext("2d"); x.drawImage(im, 0, 0);
+    const d = x.getImageData(0, 0, W, H), p = d.data;
+    for (let k = 0; k < p.length; k += 4) {
+      const r = p[k], gg = p[k + 1], b = p[k + 2];
+      if (gg > 120 && gg > r * 1.35 && gg > b * 1.35) p[k + 3] = 0;
+      else if (gg > r && gg > b) p[k + 1] = Math.max(r, b);   // de-spill green fringe
+    }
+    x.putImageData(d, 0, 0);
+    const figs = [];
+    for (let row = 0; row < 2; row++) for (let col = 0; col < 5; col++) {
+      const cx = Math.round(col * W / 5), cy = Math.round(row * H / 2), cw = Math.round(W / 5), ch = Math.round(H / 2);
+      const cd = x.getImageData(cx, cy, cw, ch).data;
+      let x0 = cw, y0 = ch, x1 = 0, y1 = 0;
+      for (let yy = 0; yy < ch; yy++) for (let xx = 0; xx < cw; xx++) if (cd[(yy * cw + xx) * 4 + 3] > 40) { if (xx < x0) x0 = xx; if (xx > x1) x1 = xx; if (yy < y0) y0 = yy; if (yy > y1) y1 = yy; }
+      if (x1 - x0 < 10 || y1 - y0 < 30) continue;
+      const fc = document.createElement("canvas"); fc.width = x1 - x0 + 1; fc.height = y1 - y0 + 1;
+      fc.getContext("2d").drawImage(c, cx + x0, cy + y0, fc.width, fc.height, 0, 0, fc.width, fc.height);
+      figs.push({ tex: texOf(fc), aspect: fc.width / fc.height });
+    }
+    if (figs.length) cb(figs);
+  });
+}
+function scatterPeople(parent, figs, n, area, avoid, seed) {
+  let s = seed;
+  const rnd = () => { s = (s * 16807) % 2147483647; return (s - 1) / 2147483646; };
+  const mats = figs.map(f => new THREE.SpriteMaterial({ map: f.tex, alphaTest: 0.5 }));
+  let placed = 0, tries = 0;
+  while (placed < n && tries < n * 20) {
+    tries++;
+    const px = area[0] + rnd() * (area[1] - area[0]), pz = area[2] + rnd() * (area[3] - area[2]);
+    if (avoid.some(a => px > a[0] && px < a[1] && pz > a[2] && pz < a[3])) continue;
+    const i = Math.floor(rnd() * figs.length), h = 1.55 + rnd() * 0.3;
+    const sp = new THREE.Sprite(mats[i]); sp.center.set(0.5, 0); sp.scale.set(h * figs[i].aspect, h, 1); sp.position.set(px, 0.02, pz);
+    parent.add(sp); placed++;
+  }
+}
+
 /* 夏南洋·骑楼烟火食集 (骑楼北广场) — reference: organizer's site render + plan */
 function buildXiaNanyang(g) {
   const cream = M(0xE9DFCC), stone = M(0xCFC4B0), dark = M(0x2A2420), roofM = M(0x3B3F44, { roughness: 0.6 }), glassM = M(0x4F7486, { roughness: 0.15, metalness: 0.5 });
   // main hall along the north edge
   const hall = new THREE.Group(); hall.position.set(0, 0, -24); g.add(hall);
+  photoFacade(g, hall);
   box(46, 12, 9, cream, 0, 6, 0, hall);                         // 3-storey body
   // gable roof
   const gable = new THREE.Shape(); gable.moveTo(-23.5, 0); gable.lineTo(0, 6.5); gable.lineTo(23.5, 0); gable.lineTo(-23.5, 0);
@@ -352,10 +471,11 @@ function buildXiaNanyang(g) {
   const ne = new THREE.Group(); ne.position.set(29, 0, -18); ne.rotation.y = -Math.PI / 4; g.add(ne);
   box(12, 9, 6, stone, 0, 4.5, 0, ne);
   for (let i = 0; i < 4; i++) { const w = new THREE.Mesh(new THREE.PlaneGeometry(2, 3), new THREE.MeshBasicMaterial({ color: 0xFFC67A, transparent: true, opacity: 0.5 })); w.position.set(-4.5 + i * 3, 2, 3.02); ne.add(w); }
-  // residential towers far in the background (west / north-west)
+  // residential towers far in the background (west / north-west) — replaced by the photo skyline once it loads
+  const towers = new THREE.Group(); g.add(towers); g.userData.onBackdrop = () => { towers.visible = false; };
   [[-70, -70, 9, 62], [-56, -82, 9, 74], [-40, -92, 9, 68], [-84, -54, 9, 56], [-24, -96, 8, 58]].forEach(([x, z, w, h], i) => {
-    box(w, h, w, M(i % 2 ? 0xB9C0C6 : 0xA9B2BA), x, h / 2, z, g);
-    for (let f = 4; f < h; f += 3) { if ((f + i) % 2) continue; const win = new THREE.Mesh(new THREE.PlaneGeometry(w - 1.5, 0.6), new THREE.MeshStandardMaterial({ color: 0xFFD493, emissive: 0xFFB255, emissiveIntensity: 0.6 })); win.position.set(x, f, z + w / 2 + 0.02); g.add(win); }
+    box(w, h, w, M(i % 2 ? 0xB9C0C6 : 0xA9B2BA), x, h / 2, z, towers);
+    for (let f = 4; f < h; f += 3) { if ((f + i) % 2) continue; const win = new THREE.Mesh(new THREE.PlaneGeometry(w - 1.5, 0.6), new THREE.MeshStandardMaterial({ color: 0xFFD493, emissive: 0xFFB255, emissiveIntensity: 0.6 })); win.position.set(x, f, z + w / 2 + 0.02); towers.add(win); }
   });
 }
 function buildVenueA() {
@@ -366,7 +486,9 @@ function buildVenueA() {
   x.strokeStyle = "rgba(255,255,255,.09)"; x.lineWidth = 2;
   for (let i = 0; i <= 256; i += 32) { x.beginPath(); x.moveTo(i, 0); x.lineTo(i, 256); x.stroke(); x.beginPath(); x.moveTo(0, i); x.lineTo(256, i); x.stroke(); }
   const gt = texOf(c); gt.wrapS = gt.wrapT = THREE.RepeatWrapping; gt.repeat.set(16, 12);
-  const ground = new THREE.Mesh(new THREE.PlaneGeometry(64, 48), new THREE.MeshStandardMaterial({ map: gt, roughness: 0.95 }));
+  const groundMat = new THREE.MeshStandardMaterial({ map: gt, roughness: 0.9 });
+  const ground = new THREE.Mesh(new THREE.PlaneGeometry(64, 48), groundMat);
+  loadTex("tex-paving.jpg", t => { t.wrapS = t.wrapT = THREE.RepeatWrapping; t.repeat.set(16, 12); groundMat.map = t; groundMat.needsUpdate = true; });
   ground.rotation.x = -Math.PI / 2; ground.receiveShadow = true; g.add(ground);
   // walkway (Qilou street) at south
   const walk = new THREE.Mesh(new THREE.PlaneGeometry(64, 5), M(0x6E655A));
@@ -420,7 +542,12 @@ function buildVenueA() {
   landmark("qilou", g, -6, 21.5, -25, 1.5);
   landmark("entry", g, -2, 3.2, 21.5, 1.0);
 
-  g.userData = { cam: new THREE.Vector3(26, 34, 46), target: new THREE.Vector3(-2, 0, 1) };
+  backdrop("bg-haikou.jpg", g, 170, 3);
+  loadPeople(figs => {
+    scatterPeople(g, figs, 120, [-16, 11, -10, 20], [[-21.5, -16.5, -10, 13], [-11.5, 7.5, -15.5, -10.5], [9, 19, -7, 3], [-7, 3, 16, 19]], 7);
+    scatterPeople(g, figs, 34, [6, 9.5, -6, 3], [], 11);  // audience in front of the stage
+  });
+  Object.assign(g.userData, { cam: new THREE.Vector3(26, 34, 46), target: new THREE.Vector3(-2, 0, 1) });
   return g;
 }
 function buildGate(parent, x, z, rotY, ko, zh) {
@@ -445,10 +572,14 @@ const stageLeds = [];
 let seaMat, ringMat;
 function buildVenueB() {
   const g = new THREE.Group();
-  const sand = new THREE.Mesh(new THREE.PlaneGeometry(96, 64), new THREE.MeshStandardMaterial({ color: 0xC7B08A, roughness: 1 }));
+  const sandMat = new THREE.MeshStandardMaterial({ color: 0xC7B08A, roughness: 1 });
+  const sand = new THREE.Mesh(new THREE.PlaneGeometry(96, 64), sandMat);
+  loadTex("tex-sand.jpg", t => { t.wrapS = t.wrapT = THREE.RepeatWrapping; t.repeat.set(14, 10); sandMat.map = t; sandMat.color.set(0xffffff); sandMat.needsUpdate = true; });
   sand.rotation.x = -Math.PI / 2; sand.position.z = -4; sand.receiveShadow = true; g.add(sand);
   // event deck (plaza)
-  const deck = new THREE.Mesh(new THREE.PlaneGeometry(72, 40), M(0x6F6A63));
+  const deckMat = new THREE.MeshStandardMaterial({ color: 0x7A756E, roughness: 0.9 });
+  const deck = new THREE.Mesh(new THREE.PlaneGeometry(72, 40), deckMat);
+  loadTex("tex-paving.jpg", t => { const tt = t.clone(); tt.wrapS = tt.wrapT = THREE.RepeatWrapping; tt.repeat.set(18, 10); tt.needsUpdate = true; deckMat.map = tt; deckMat.color.set(0xffffff); deckMat.needsUpdate = true; });
   deck.rotation.x = -Math.PI / 2; deck.position.set(0, 0.02, -1); deck.receiveShadow = true; g.add(deck);
   // boardwalk
   box(80, 0.12, 3, M(0x8A6A4A), 0, 0.06, 21, g);
@@ -478,37 +609,27 @@ function buildVenueB() {
   Bb.slice(10, 17).forEach((b, i) => makeBooth(b, g, -33, -10 + i * 4.6, Math.PI / 2));
   Bb.slice(17, 24).forEach((b, i) => makeBooth(b, g, 33, -10 + i * 4.6, -Math.PI / 2));
 
-  // K-POP dance battle arena
-  const arena = cyl(7, 7.3, 0.35, M(0x1A1F26, { roughness: 0.35 }), 48); arena.position.set(0, 0.17, -4); g.add(arena);
-  ringMat = new THREE.MeshStandardMaterial({ color: 0xFF4FA3, emissive: 0xFF4FA3, emissiveIntensity: 1.6 });
-  const ring = new THREE.Mesh(new THREE.TorusGeometry(7.05, 0.12, 8, 64), ringMat); ring.rotation.x = Math.PI / 2; ring.position.set(0, 0.36, -4); g.add(ring);
-  const inner = new THREE.Mesh(new THREE.TorusGeometry(4.2, 0.07, 8, 64), new THREE.MeshStandardMaterial({ color: 0x34BFAC, emissive: 0x34BFAC, emissiveIntensity: 1.4 }));
-  inner.rotation.x = Math.PI / 2; inner.position.set(0, 0.37, -4); g.add(inner);
-  // little crowd ring around arena
-  const crowdM = [M(0xE2483D), M(0xF4EFE6), M(0x2E64A8), M(0xF2B84B), M(0x34BFAC)];
-  for (let i = 0; i < 46; i++) {
-    const a = i / 46 * Math.PI * 2, r = 8.6 + (i % 3) * 0.7;
-    const body = cyl(0.22, 0.26, 1.1, crowdM[i % 5], 6); body.position.set(Math.cos(a) * r, 0.55, -4 + Math.sin(a) * r); g.add(body);
-    const head = new THREE.Mesh(new THREE.SphereGeometry(0.2, 8, 6), M(0x2B2018)); head.position.set(Math.cos(a) * r, 1.3, -4 + Math.sin(a) * r); g.add(head);
-  }
-  landmark("arena", g, 0, 4.2, -4, 1.4);
-
-  // main stage at south, facing north
-  const st = new THREE.Group(); st.position.set(0, 0, 12.5); st.rotation.y = Math.PI; g.add(st);
+  // same principle as the organizer's Haikou plan: one stage on the right, parasol dining in the middle
+  // main stage (K-POP dance battle + performances) on the east side, facing west
+  const st = new THREE.Group(); st.position.set(21, 0, 2); st.rotation.y = -Math.PI / 2; g.add(st);
   box(14, 1.1, 8, M(0x1F2429), 0, 0.55, 0, st);
   for (let k = 0; k < 3; k++) box(8, 0.35 * (3 - k), 0.4, M(0x2A3036), 0, 0.17 * (3 - k), 4.2 + k * 0.4, st);
   const truss = M(0xB8BEC4, { metalness: 0.6, roughness: 0.4 });
   [-7.2, 7.2].forEach(px => box(0.6, 8.5, 0.6, truss, px, 4.25, -3.6, st));
   box(15, 0.6, 0.6, truss, 0, 8.5, -3.6, st);
   box(15, 0.4, 0.4, truss, 0, 8.5, 1.5, st);
+  [-7.2, 7.2].forEach(px => box(0.4, 0.4, 5.1, truss, px, 8.5, -1.05, st));
   const ledC = textCanvas("K-POP MAIN STAGE", "海南中韩文化美食嘉年华", { f1: 52, f2: 36, bg: "#160F33", radius: 0, minW: 1100, c1: "#FFFFFF", c2: "#7FE8D8" });
   const led = new THREE.Mesh(new THREE.PlaneGeometry(13, 5.4), new THREE.MeshBasicMaterial({ map: texOf(ledC.c) }));
   led.position.set(0, 4.4, -3.4); st.add(led); stageLeds.push(led);
   [-6, 6].forEach(px => box(1.1, 2.6, 1.1, M(0x16191C), px, 2.4, 2.8, st));
-  landmark("main", g, 0, 11.2, 12.5, 1.4);
+  landmark("main", g, 21, 11.2, 2, 1.4);
 
-  // parasols along the sides of the arena
-  [[-18, -6], [-18, 0], [-18, 6], [18, -6], [18, 0], [18, 6], [-12, 8], [12, 8]].forEach(([px, pz], i) => { const p = parasolSet(); p.position.set(px, 0, pz); p.rotation.y = i; g.add(p); });
+  // parasol dining area in the middle (5 x 4)
+  for (let r = 0; r < 4; r++) for (let c = 0; c < 5; c++) {
+    const p = parasolSet(); p.position.set(-20 + c * 5, 0, -8 + r * 5); p.rotation.y = (r + c) * 0.4; g.add(p);
+  }
+  landmark("parasol", g, -10, 4.6, -0.5);
 
   // beach photo zone: giant frame
   const pz = new THREE.Group(); pz.position.set(-26, 0, 17); pz.rotation.y = 0.5; g.add(pz);
@@ -518,8 +639,8 @@ function buildVenueB() {
   heart.position.set(0, 4.9, 0); pz.add(heart);
   landmark("photo", g, -26, 7.4, 17, 1.1);
 
-  buildGate(g, 24, 21, 0, "한국문화제", "韩国文化节");
-  landmark("gate", g, 24, 9.4, 21, 1.2);
+  buildGate(g, -2, 21, 0, "한국문화제", "韩国文化节");
+  landmark("gate", g, -2, 9.4, 21, 1.2);
 
   // lantern strings over the plaza
   const q = [pole(-28, -21, 6, g), pole(-28, 16, 6, g), pole(28, -21, 6, g), pole(28, 16, 6, g)];
@@ -533,7 +654,12 @@ function buildVenueB() {
     const p = palm(6.5 + (i % 4), 0.2 + (i % 3) * 0.12); p.position.set(px, 0, pzz); p.rotation.y = i * 1.3; g.add(p);
   }
   landmark("sea", g, 0, 2.5, 46, 1.8);
-  g.userData = { cam: new THREE.Vector3(40, 46, 66), target: new THREE.Vector3(0, 0, 0) };
+  backdrop("bg-beach.jpg", g, 190, 3);
+  loadPeople(figs => {
+    scatterPeople(g, figs, 190, [-30, 30, -14, 19], [[-35.5, -30.5, -13, 19], [-25, 25, -19.5, -14.5], [30.5, 35.5, -13, 19], [13, 28, -6, 10], [-7, 3, 19, 23]], 3);
+    scatterPeople(g, figs, 40, [9, 13, -5, 9], [], 5);
+  });
+  Object.assign(g.userData, { cam: new THREE.Vector3(40, 46, 66), target: new THREE.Vector3(0, 0, 0) });
   return g;
 }
 
@@ -607,9 +733,16 @@ renderer.domElement.addEventListener("pointermove", e => {
 controls.addEventListener("start", () => { tween = null; });
 
 /* ---------- resize + loop ---------- */
+const composer = new EffectComposer(renderer);
+composer.addPass(new RenderPass(scene, camera));
+const bloom = new UnrealBloomPass(new THREE.Vector2(512, 512), 0.38, 0.5, 0.93);
+composer.addPass(bloom);
+composer.addPass(new OutputPass());
 function resize() {
   const w = stage.clientWidth, h = stage.clientHeight;
   renderer.setSize(w, h, false);
+  composer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.5));
+  composer.setSize(w, h);
   camera.aspect = w / h; camera.updateProjectionMatrix();
 }
 new ResizeObserver(resize).observe(stage);
@@ -639,7 +772,7 @@ function loop() {
     lanternMeshes.forEach((l, i) => { l.material.emissiveIntensity = 1 + Math.sin(t * 2 + i) * 0.25; });
   }
   controls.update();
-  renderer.render(scene, camera);
+  composer.render();
 }
 loadingEl.remove();
 loop();
